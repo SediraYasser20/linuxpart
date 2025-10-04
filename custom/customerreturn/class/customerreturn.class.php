@@ -306,12 +306,14 @@ class CustomerReturn extends CommonObject
         return -1;
     }
 
-    public function validate($user, $notrigger = 0)
+  public function validate($user, $notrigger = 0)
     {
         global $langs, $conf;
 
+        dol_syslog(__METHOD__." Starting validation for id=".$this->id, LOG_DEBUG);
+
         if ($this->statut != self::STATUS_DRAFT) {
-            $this->error = 'CustomerReturn is not in draft status';
+            $this->error = 'CustomerReturn is not in draft status (current status: '.$this->statut.')';
             dol_syslog(__METHOD__." Error: ".$this->error, LOG_ERR);
             return -1;
         }
@@ -324,8 +326,21 @@ class CustomerReturn extends CommonObject
 
         $this->db->begin();
 
+        // Ensure thirdparty is loaded
+        if (empty($this->thirdparty) && $this->fk_soc > 0) {
+            $this->thirdparty = new Societe($this->db);
+            if ($this->thirdparty->fetch($this->fk_soc) <= 0) {
+                $this->error = 'Failed to load thirdparty';
+                dol_syslog(__METHOD__." Error: ".$this->error, LOG_ERR);
+                $this->db->rollback();
+                return -1;
+            }
+        }
+
         // Load numbering module
         $numbering_module = getDolGlobalString('CUSTOMERRETURN_ADDON', 'mod_customerreturn_standard');
+        dol_syslog(__METHOD__." Using numbering module: ".$numbering_module, LOG_DEBUG);
+        
         dol_include_once('/custom/customerreturn/core/modules/customerreturn/'.$numbering_module.'.php');
         if (!class_exists($numbering_module)) {
             $this->error = 'Numbering module '.$numbering_module.' not found';
@@ -336,8 +351,11 @@ class CustomerReturn extends CommonObject
 
         $obj = new $numbering_module($this->db);
         $new_ref = $obj->getNextValue($this->thirdparty, $this);
-        if ($new_ref <= 0 || empty($new_ref)) {
-            $this->error = $obj->error ?: 'Failed to generate new reference';
+        
+        dol_syslog(__METHOD__." Generated new ref: ".$new_ref, LOG_DEBUG);
+        
+        if (empty($new_ref) || $new_ref <= 0) {
+            $this->error = !empty($obj->error) ? $obj->error : 'Failed to generate new reference';
             dol_syslog(__METHOD__." Error: ".$this->error, LOG_ERR);
             $this->db->rollback();
             return -1;
@@ -350,11 +368,15 @@ class CustomerReturn extends CommonObject
         $sql .= ", fk_user_valid = ".(int) $user->id;
         $sql .= " WHERE rowid = ".(int) $this->id;
 
-        dol_syslog(__METHOD__." Executing: ".$sql, LOG_DEBUG);
+        dol_syslog(__METHOD__." SQL: ".$sql, LOG_DEBUG);
+        
         $resql = $this->db->query($sql);
         if ($resql) {
+            dol_syslog(__METHOD__." UPDATE successful, affected rows: ".$this->db->affected_rows($resql), LOG_DEBUG);
+            
             $this->ref = $new_ref;
             $this->statut = self::STATUS_VALIDATED;
+            
             if (!$notrigger) {
                 $result = $this->call_trigger('CUSTOMERRETURN_VALIDATE', $user);
                 if ($result < 0) {
@@ -364,16 +386,18 @@ class CustomerReturn extends CommonObject
                     return -1;
                 }
             }
+            
             $this->db->commit();
-            dol_syslog(__METHOD__." Validation successful for id=".$this->id, LOG_DEBUG);
+            dol_syslog(__METHOD__." Validation completed successfully for id=".$this->id.", new ref=".$new_ref, LOG_DEBUG);
             return 1;
         }
 
         $this->error = $this->db->lasterror();
-        dol_syslog(__METHOD__." Error: ".$this->error, LOG_ERR);
+        dol_syslog(__METHOD__." SQL Error: ".$this->error, LOG_ERR);
         $this->db->rollback();
         return -1;
     }
+
 
     public function process($user, $notrigger = 0)
     {
@@ -408,14 +432,32 @@ class CustomerReturn extends CommonObject
         return -1;
     }
 
-    public function updateStock($line, $user)
+ public function updateStock($line, $user)
     {
         global $conf, $langs;
         if (empty($conf->stock->enabled)) return 1;
         require_once DOL_DOCUMENT_ROOT.'/product/stock/class/mouvementstock.class.php';
+        
+        // Load product to check if it uses batch tracking
+        $product = new Product($this->db);
+        if ($product->fetch($line->fk_product) <= 0) {
+            $this->error = 'Failed to load product';
+            dol_syslog(__METHOD__." Error: ".$this->error, LOG_ERR);
+            return -1;
+        }
+        
         $mouvementstock = new MouvementStock($this->db);
         $label = $langs->trans("CustomerReturn").' '.$this->ref;
-        $result = $mouvementstock->reception($user, $line->fk_product, $line->fk_entrepot, $line->qty, 0, $label, '', $line->batch);
+        
+        // For products with batch tracking, we need to pass batch info correctly
+        if ($product->hasbatch() && !empty($line->batch)) {
+            // Use _create method directly for better control with batch products
+            $result = $mouvementstock->_create($user, $line->fk_product, $line->fk_entrepot, $line->qty, 3, 0, $label, '', '', '', '', $line->batch);
+        } else {
+            // For regular products without batch tracking
+            $result = $mouvementstock->reception($user, $line->fk_product, $line->fk_entrepot, $line->qty, 0, $label);
+        }
+        
         if ($result < 0) {
             $this->error = $mouvementstock->error;
             dol_syslog(__METHOD__." Error updating stock: ".$this->error, LOG_ERR);
@@ -537,3 +579,4 @@ class CustomerReturn extends CommonObject
         return -1;
     }
 }
+
