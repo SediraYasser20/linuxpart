@@ -578,5 +578,89 @@ class CustomerReturn extends CommonObject
         dol_syslog(__METHOD__." Error creating credit note: ".$this->error, LOG_ERR);
         return -1;
     }
+
+public function backToDraft($user, $notrigger = false)
+{
+    global $langs;
+
+    if ($this->fk_facture > 0) {
+        $this->error = $langs->trans('ErrorCreditNoteAlreadyCreated');
+        dol_syslog(__METHOD__." Error: ".$this->error, LOG_ERR);
+        return -1;
+    }
+
+    $this->db->begin();
+
+    if ($this->statut == self::STATUS_CLOSED) {
+        foreach ($this->lines as $line) {
+            if ($line->fk_product > 0 && $line->qty > 0) {
+                if ($this->reverseStock($line, $user) < 0) {
+                    $this->db->rollback();
+                    return -1;
+                }
+            }
+        }
+    }
+
+    $sql = "UPDATE ".MAIN_DB_PREFIX."customerreturn 
+            SET statut = ".self::STATUS_DRAFT.",
+                date_valid = NULL, 
+                fk_user_valid = NULL, 
+                date_process = NULL
+            WHERE rowid = ".(int) $this->id;
+
+    $resql = $this->db->query($sql);
+    if ($resql) {
+        if (!$notrigger) {
+            if ($this->call_trigger('CUSTOMERRETURN_BACKTODRAFT', $user) < 0) {
+                $this->db->rollback();
+                return -1;
+            }
+        }
+        $this->db->commit();
+        return 1;
+    }
+
+    $this->error = $this->db->lasterror();
+    dol_syslog(__METHOD__." Error: ".$this->error, LOG_ERR);
+    $this->db->rollback();
+    return -1;
+}
+
+
+ 
+public function reverseStock($line, $user)
+    {
+        global $conf, $langs;
+        if (empty($conf->stock->enabled)) return 1;
+        require_once DOL_DOCUMENT_ROOT.'/product/stock/class/mouvementstock.class.php';
+
+        $product = new Product($this->db);
+        if ($product->fetch($line->fk_product) <= 0) {
+            $this->error = 'Failed to load product';
+            dol_syslog(__METHOD__." Error: ".$this->error, LOG_ERR);
+            return -1;
+        }
+
+        $mouvementstock = new MouvementStock($this->db);
+        $label = $langs->trans("CustomerReturnBackToDraft").' '.$this->ref;
+
+        // To reverse a stock reception, we need to remove stock (negative quantity)
+        // Movement type 3 = Reception, Type 2 = Shipment/Removal
+        if ($product->hasbatch() && !empty($line->batch)) {
+            // Use negative quantity to remove stock, type 2 for shipment/removal
+            $result = $mouvementstock->_create($user, $line->fk_product, $line->fk_entrepot, -$line->qty, 2, 0, $label, '', '', '', '', $line->batch);
+        } else {
+            // For non-batch products, use livraison method which removes stock
+            $result = $mouvementstock->livraison($user, $line->fk_product, $line->fk_entrepot, $line->qty, 0, $label);
+        }
+
+        if ($result < 0) {
+            $this->error = $mouvementstock->error;
+            dol_syslog(__METHOD__." Error reversing stock: ".$this->error, LOG_ERR);
+        }
+        return $result;
+    }
+ 
 }
 

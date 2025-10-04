@@ -125,32 +125,17 @@ if (empty($reshook)) {
 
     // Back to draft action (revert validated/closed to draft)
     if ($action == 'confirm_backtodraft' && $confirm == 'yes') {
-        // Permission: reuse same create/modify right
         if (!$user->hasRight('customerreturn', 'creer') && !$user->admin) {
             setEventMessages($langs->trans("NotEnoughPermissions"), null, 'errors');
             $action = '';
         } else {
-            $db->begin();
-            // Try to revert status to draft and clear validation/process dates and users
-            $sql = "UPDATE " . MAIN_DB_PREFIX . "customerreturn SET statut = " . CustomerReturn::STATUS_DRAFT;
-            $sql .= ", date_valid = NULL, fk_user_valid = NULL, date_process = NULL, fk_user_process = NULL";
-            $sql .= " WHERE rowid = " . (int) $object->id;
-
-            $resql = $db->query($sql);
-            if ($resql) {
-                // Call trigger to notify other modules
-                if ($object->call_trigger('CUSTOMERRETURN_BACKTODRAFT', $user) < 0) {
-                    $db->rollback();
-                    setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
-                } else {
-                    $db->commit();
-                    setEventMessages($langs->trans('CustomerReturnSetToDraft'), null, 'mesgs');
-                    header("Location: ".$_SERVER['PHP_SELF']."?id=".$object->id);
-                    exit;
-                }
+            $result = $object->backToDraft($user);
+            if ($result > 0) {
+                setEventMessages($langs->trans('CustomerReturnSetToDraft'), null, 'mesgs');
+                header("Location: ".$_SERVER['PHP_SELF']."?id=".$object->id);
+                exit;
             } else {
-                $db->rollback();
-                setEventMessages($db->lasterror(), null, 'errors');
+                setEventMessages($object->error, $object->errors, 'errors');
                 $action = '';
             }
         }
@@ -359,7 +344,11 @@ if ($object->statut == CustomerReturn::STATUS_CLOSED && empty($object->fk_factur
 
 // Show "Back to draft" button when record is validated or closed
 if (($object->statut == CustomerReturn::STATUS_VALIDATED || $object->statut == CustomerReturn::STATUS_CLOSED) && $usercanvalidate) {
-    print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=backtodraft&token='.newToken().'">'.$langs->trans('SetToDraft').'</a>';
+    if ($object->fk_facture > 0) {
+        print '<span class="butActionRefused classfortooltip" title="'.dol_escape_htmltag($langs->trans("ErrorCreditNoteAlreadyCreated")).'">'.$langs->trans('SetToDraft').'</span>';
+    } else {
+        print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=backtodraft&token='.newToken().'">'.$langs->trans('SetToDraft').'</a>';
+    }
 }
 
 print '</div>';
