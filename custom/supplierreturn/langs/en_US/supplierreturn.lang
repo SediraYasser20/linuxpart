@@ -1,0 +1,179 @@
+# Dolibarr language file - en_US - supplierreturns
+CHARSET=UTF-8
+
+# Module
+Module468270Name=Supplier Returns
+Module468270Desc=Management of product returns to suppliers
+
+# Rights
+Permission468271=Read supplier returns
+Permission468272=Create/modify supplier returns
+Permission600303=Delete supplier returns
+Permission600304=Validate supplier returns
+Permission600305=Process/close supplier returns
+
+# Menu
+TopMenuSupplierReturns=Supplier Returns
+NewSupplierReturn=New return
+SupplierReturnsList=Returns list
+
+# General
+SupplierReturn=Supplier return
+SupplierReturns=Supplier returns
+NewSupplierReturn=New supplier return
+SearchSupplierReturn=Search supplier return
+SupplierReturnCard=Supplier return card
+CreateSupplierReturn=Create supplier return
+ModifySupplierReturn=Modify supplier return
+DeleteSupplierReturn=Delete supplier return
+
+# Fields
+DateReturn=Return date
+Reception=Reception
+OriginalReception=Original reception
+ReturnReason=Return reason
+ReturnQty=Returned quantity
+ProcessReturn=Process return
+ValidateReturn=Validate return
+
+# Status
+SupplierReturnStatusDraft=Draft
+
+# Return Reasons Administration
+ReturnReasonKey=Reason key
+ReturnReasonLabel=Reason label
+AddNewReturnReason=Add new return reason
+DeleteReturnReason=Delete return reason
+ConfirmDeleteReturnReason=Are you sure you want to delete this return reason?
+ReturnReasonAdded=Return reason added successfully
+ReturnReasonDeleted=Return reason deleted successfully
+ReturnReasonUpdated=Return reason updated successfully
+ReturnReasonKeyAlreadyExists=This reason key already exists
+NoReturnReasonsConfigured=No return reasons configured
+ResetToDefaultReasons=Reset to default reasons
+ConfirmResetToDefaultReasons=Are you sure you want to reset to default return reasons? This will replace all current reasons.
+DefaultReasonsRestored=Default reasons restored successfully
+SupplierReturnReturnReasonsDesc=Configure the available return reasons for supplier returns. These will appear in dropdown lists when creating returns.
+
+# Default return reasons
+defective=Defective product
+damaged=Damaged during transport
+wrong_item=Wrong item received
+excess_quantity=Excess quantity
+quality_issue=Quality issue
+not_as_described=Not as described
+other=Other reason
+
+DefectiveProduct=Defective product
+
+# Admin tabs
+ReturnReasons=Return Reasons
+SupplierReturnStatusValidated=Validated
+SupplierReturnStatusProcessed=Processed
+SupplierReturnStatusCanceled=Canceled
+
+# Actions/Buttons
+Process=Process
+ProcessSupplierReturn=Process return
+CreateCreditNote=Create credit note
+ValidateSupplierReturn=Validate return
+CancelSupplierReturn=Cancel return
+
+# Return Reasons - Common motifs
+defective=Defective product
+wrong_product=Wrong product delivered
+damaged=Damaged product
+expired=Expired product
+overdelivery=Over delivery
+quality_issue=Quality issue
+not_ordered=Product not ordered
+late_delivery=Late delivery
+other=Other reason
+OtherReasonDetail=Other reason detail
+SpecifyOtherReason=Please specify the reason...
+
+# Admin messages
+NoNumberingModuleFound=No numbering module found
+NoPDFTemplateFound=No PDF template found
+ErrorFileGenerated=Error generating file
+
+# Menu states
+SupplierReturnsDraft=Draft returns
+SupplierReturnsValidated=Validated returns
+SupplierReturnsProcessed=Processed returns
+SupplierReturnsCanceled=Canceled returns
+AllSupplierReturns=All returns
+
+# Messages
+SupplierReturnCreated=Supplier return created
+SupplierReturnModified=Supplier return modified
+SupplierReturnValidated=Supplier return validated
+SupplierReturnProcessed=Supplier return processed
+CreditNoteCreated=Credit note created successfully
+ConfirmValidateSupplierReturn=Are you sure you want to validate this supplier return?
+ConfirmProcessSupplierReturn=Are you sure you want to process this return? This action will update stock.
+
+# From Reception Interface
+CreateReturnFromReception=Create return from reception
+SelectReception=Select a reception
+ReceptionRef=Reception reference
+QtyReceived=Qty received
+QtyAlreadyReturned=Qty already returned
+QtyAvailableForReturn=Qty available for return
+QtyToReturn=Qty to return
+CreateReturn=Create return
+NoReceptionFound=No reception found
+NoProductInReception=No product in this reception
+StatusReceptionValidated=Validated
+ReceptionNotFound=Reception not found
+ConfirmDeleteSupplierReturn=Are you sure you want to delete this supplier return?
+
+# Additional fields
+# Batch=Use native Dolibarr translation (stocks.lang)
+# Warehouse=Use native Dolibarr translation (stocks.lang)
+# UnitPrice=Use native Dolibarr translation (main.lang)
+# TotalHT=Use native Dolibarr translation (main.lang)
+# Product=Use native Dolibarr translation (products.lang)
+# Description=Use native Dolibarr translation (main.lang)
+# Qty=Use native Dolibarr translation (main.lang)
+SupplierRef=Supplier reference
+InternalRef=Internal reference
+AutoGenerateRef=Auto generate reference
+ToBeGenerated=To be generated automatically
+
+# Configuration
+SupplierReturnsSetup=Supplier Returns Setup
+GeneralSettings=General settings
+ModuleInformation=Module information
+SupplierReturnNumberingMask=Numbering mask
+SupplierReturnNumberingMaskDesc=Mask used to generate return references
+AutoValidateCreditNote=Auto-validate credit notes
+AutoValidateCreditNoteDesc=Automatically validate credit notes created from returns
+DisablePDFAutoGeneration=Disable PDF auto-generation
+DisablePDFAutoGenerationDesc=Prevent automatic PDF generation during validation
+DataDirectory=Data directory
+Modulepart=Modulepart
+DatabaseTables=Database tables
+DocumentModels=Document templates
+NumberingRules=Numbering rules
+StandardNumbering=Standard numbering
+SetupOfNumbering=Numbering setup
+Mask=Mask
+SupplierReturnStandardPDF=Standard model for supplier returns
+Settings=Settings
+NumberingModule=Numbering module
+ExtraFields=Extra fields
+
+# Error messages
+ErrorSupplierReturnNotFound=Supplier return not found
+ErrorCannotDeleteValidatedReturn=Cannot delete validated return
+ErrorNoLinesInReturn=No lines in this return
+
+# PDF Generation
+SupplierReturnStandardPDF=Standard model for supplier returns
+PDFSupplierReturnTitle=Supplier Return
+GeneratePDF=Generate PDF
+
+# Watermark options
+WatermarkOnDraftSupplierReturnPDF=Watermark on draft supplier return PDFs
+WatermarkOnDraftSupplierReturnPDFHelp=Text to show as watermark on PDF documents of draft supplier returns

@@ -1,0 +1,252 @@
+# Dolibarr language file - Source file is en_US - supplierreturns
+CHARSET=UTF-8
+
+# Module
+Module104000Name=Retours Fournisseurs
+Module104000Desc=Gestion des retours de produits aux fournisseurs
+Module468270Name=Retours Fournisseurs
+Module468270Desc=Gestion des retours de produits aux fournisseurs
+
+# Rights
+Permission600301=Lire les retours fournisseurs
+Permission600302=Créer/modifier les retours fournisseurs
+Permission600303=Supprimer les retours fournisseurs
+Permission600304=Valider les retours fournisseurs
+Permission600305=Traiter/fermer les retours fournisseurs
+
+# Menu
+TopMenuSupplierReturns=Retours Fournisseurs
+NewSupplierReturn=Nouveau retour
+SupplierReturnsList=Liste des retours
+
+# General
+SupplierReturn=Retour fournisseur
+SupplierReturns=Retours fournisseurs
+NewSupplierReturn=Nouveau retour fournisseur
+SearchSupplierReturn=Rechercher retour fournisseur
+SupplierReturnCard=Fiche retour fournisseur
+CreateSupplierReturn=Créer retour fournisseur
+ModifySupplierReturn=Modifier retour fournisseur
+DeleteSupplierReturn=Supprimer retour fournisseur
+
+# Fields
+DateReturn=Date de retour
+Reception=Réception
+OriginalReception=Réception d'origine
+ReturnReason=Motif du retour
+ReturnQty=Quantité retournée
+ProcessReturn=Traiter le retour
+ValidateReturn=Valider le retour
+
+# Status
+SupplierReturnStatusDraft=Brouillon
+SupplierReturnStatusValidated=Validé
+SupplierReturnStatusProcessed=Traité
+SupplierReturnStatusCanceled=Annulé
+
+# Actions/Buttons
+Process=Traiter
+ProcessSupplierReturn=Traiter le retour
+CreateCreditNote=Créer avoir
+ValidateSupplierReturn=Valider le retour
+CancelSupplierReturn=Annuler le retour
+
+# Setup / Configuration
+SupplierReturnSetup=Configuration retours fournisseurs
+Settings=Paramètres
+NumberingModule=Module de numérotation
+AutoValidateCreditNote=Validation automatique des avoirs
+DisablePDFAutoGen=Désactiver la génération PDF automatique
+BackToModuleList=Retour à la liste des modules
+
+# Administration des motifs de retour
+ReturnReasonKey=Clé du motif
+ReturnReasonLabel=Libellé du motif
+AddNewReturnReason=Ajouter un nouveau motif de retour
+DeleteReturnReason=Supprimer le motif de retour
+ConfirmDeleteReturnReason=Êtes-vous sûr de vouloir supprimer ce motif de retour ?
+ReturnReasonAdded=Motif de retour ajouté avec succès
+ReturnReasonDeleted=Motif de retour supprimé avec succès
+ReturnReasonUpdated=Motif de retour mis à jour avec succès
+ReturnReasonKeyAlreadyExists=Cette clé de motif existe déjà
+NoReturnReasonsConfigured=Aucun motif de retour configuré
+ResetToDefaultReasons=Réinitialiser aux motifs par défaut
+ConfirmResetToDefaultReasons=Êtes-vous sûr de vouloir réinitialiser aux motifs de retour par défaut ? Cela remplacera tous les motifs actuels.
+DefaultReasonsRestored=Motifs par défaut restaurés avec succès
+SupplierReturnReturnReasonsDesc=Configurez les motifs de retour disponibles pour les retours fournisseurs. Ceux-ci apparaîtront dans les listes déroulantes lors de la création de retours.
+
+# Return Reasons - Common motifs
+defective=Produit défectueux
+wrong_product=Mauvais produit livré
+damaged=Produit endommagé
+expired=Produit périmé
+overdelivery=Surlivraison
+quality_issue=Problème de qualité
+not_ordered=Produit non commandé
+wrong_item=Mauvais article reçu
+excess_quantity=Quantité excédentaire
+not_as_described=Non conforme à la description
+other=Autre motif
+
+DefectiveProduct=Produit défectueux
+
+# Onglets admin
+ReturnReasons=Motifs de retour
+late_delivery=Livraison tardive
+other=Autre motif
+OtherReasonDetail=Précision autre motif
+SpecifyOtherReason=Précisez le motif...
+
+# Messages admin
+NoNumberingModuleFound=Aucun module de numérotation trouvé
+NoPDFTemplateFound=Aucun modèle PDF trouvé
+ErrorFileGenerated=Erreur lors de la génération du fichier
+
+# Menu states
+SupplierReturnsDraft=Retours brouillon
+SupplierReturnsValidated=Retours validés
+SupplierReturnsProcessed=Retours traités
+SupplierReturnsCanceled=Retours annulés
+AllSupplierReturns=Tous les retours
+
+# Messages
+SupplierReturnCreated=Retour fournisseur créé
+SupplierReturnModified=Retour fournisseur modifié
+SupplierReturnValidated=Retour fournisseur validé
+SupplierReturnProcessed=Retour fournisseur traité
+CreditNoteCreated=Facture d'avoir créée avec succès
+ConfirmValidateSupplierReturn=Êtes-vous sûr de vouloir valider ce retour fournisseur ?
+ConfirmProcessSupplierReturn=Êtes-vous sûr de vouloir traiter ce retour ? Cette action mettra à jour le stock.
+
+# Administration
+Settings=Configuration
+NumberingModule=Module de numérotation
+AutoValidateCreditNote=Valider automatiquement les avoirs
+DisablePDFAutoGen=Désactiver la génération automatique de PDF
+SupplierReturnSetup=Configuration des retours fournisseurs
+Configuration=Configuration
+
+# Reception Status
+StatusReceptionValidated=Validée
+StatusReceptionProcessed=Traitée
+NoReceptionFound=Aucune réception trouvée
+SelectReception=Sélectionner une réception
+ReceptionRef=Référence réception
+
+# Numbering
+NumberingModuleDesc=Module de numérotation pour les références des retours fournisseurs
+SimpleNumRefModelDesc=Modèle simple avec préfixe %s
+ConfirmCreateCreditNote=Êtes-vous sûr de vouloir créer une facture d'avoir pour ce retour ? Les prix seront repris de la facture fournisseur d'origine.
+
+# From Reception Interface
+CreateReturnFromReception=Créer retour depuis réception
+SelectReception=Sélectionner une réception
+ReceptionRef=Référence réception
+QtyReceived=Qté reçue
+QtyAlreadyReturned=Qté déjà retournée
+QtyAvailableForReturn=Qté disponible pour retour
+QtyToReturn=Quantité à retourner
+CreateReturn=Créer le retour
+NoReceptionFound=Aucune réception trouvée
+NoProductInReception=Aucun produit dans cette réception
+StatusReceptionValidated=Validée
+ReceptionNotFound=Réception non trouvée
+ConfirmDeleteSupplierReturn=Êtes-vous sûr de vouloir supprimer ce retour fournisseur ?
+
+# Hooks and integration
+RelatedReturns=Retours liés
+Returns=Retours
+# Amount=Use native Dolibarr translation (main.lang)
+
+# Configuration
+SupplierReturnsSetup=Configuration Retours Fournisseurs
+GeneralSettings=Paramètres généraux
+ModuleInformation=Informations du module
+SupplierReturnNumberingMask=Masque de numérotation
+SupplierReturnNumberingMaskDesc=Masque utilisé pour générer les références des retours
+AutoValidateCreditNote=Validation automatique des avoirs
+AutoValidateCreditNoteDesc=Valider automatiquement les avoirs créés depuis les retours
+DisablePDFAutoGeneration=Désactiver génération PDF automatique
+DisablePDFAutoGenerationDesc=Empêche la génération automatique de PDF lors de la validation
+DataDirectory=Répertoire de données
+Modulepart=Modulepart
+DatabaseTables=Tables de base de données
+DocumentModels=Modèles de documents
+NumberingRules=Règles de numérotation
+StandardNumbering=Numérotation standard
+SetupOfNumbering=Configuration de la numérotation
+Mask=Masque
+SupplierReturnStandardPDF=Modèle standard pour retours fournisseurs
+
+# Admin interface - Numbering options  
+NumberingOptions=Options de numérotation
+SupplierReturnNumberingHelp=Configuration du format de numérotation des retours fournisseurs
+AvailableVariables=Variables disponibles
+FormatOfRefNumber=Format de la référence
+NumberingMask=Masque de numérotation
+
+# Admin interface - Document templates
+SupplierReturnsDocumentModels=Modèles de documents pour retours fournisseurs
+
+# Legacy configuration keys (to be removed)
+SUPPLIERRETURN_AUTO_VALIDATE_CREDITNOTE=Validation automatique des avoirs créés
+SUPPLIERRETURN_AUTO_VALIDATE_CREDITNOTE_HELP=Si activé, les factures d'avoir créées depuis les retours seront automatiquement validées
+ExtraFields=Champs supplémentaires
+Lines=Lignes
+
+# Admin
+Setup=Configuration
+Options=Options
+
+# Triggers/Events
+SupplierReturnCreated=Retour fournisseur %s créé
+SupplierReturnValidated=Retour fournisseur %s validé
+SupplierReturnClosed=Retour fournisseur %s fermé
+
+# Error messages
+ErrorSupplierReturnNotFound=Retour fournisseur non trouvé
+ErrorCannotDeleteValidatedReturn=Impossible de supprimer un retour validé
+ErrorNoLinesInReturn=Aucune ligne dans ce retour
+
+# Additional fields
+SupplierRef=Référence fournisseur
+InternalRef=Référence interne
+AutoGenerateRef=Générer automatiquement la référence
+ToBeGenerated=À générer automatiquement
+
+# Additional fields
+# Batch=Use native Dolibarr translation (stocks.lang)
+# Warehouse=Use native Dolibarr translation (stocks.lang)
+
+# PDF Generation
+SupplierReturnStandardPDF=Modèle standard pour retours fournisseurs
+PDFSupplierReturnTitle=Retour Fournisseur
+GeneratePDF=Générer PDF
+
+# Options de filigrane
+WatermarkOnDraftSupplierReturnPDF=Filigrane sur les PDF de retours brouillon
+WatermarkOnDraftSupplierReturnPDFHelp=Texte à afficher en filigrane sur les documents PDF des retours en statut brouillon
+# UnitPrice=Use native Dolibarr translation (main.lang)
+# TotalHT=Use native Dolibarr translation (main.lang)
+# Product=Use native Dolibarr translation (products.lang)
+# Description=Use native Dolibarr translation (main.lang)
+# Qty=Use native Dolibarr translation (main.lang)
+
+# Admin page - new native style
+SupplierReturnsNumberingModules=Modules de numérotation des retours fournisseurs
+SupplierReturnsDocumentModels=Modèles de documents pour retours fournisseurs
+OtherOptions=Autres options
+WatermarkOnDraftSupplierReturnPDF=Filigrane sur les PDF des retours brouillon
+WatermarkOnDraftSupplierReturnPDFHelp=Texte à afficher en filigrane sur les documents PDF des retours en statut brouillon
+FreeLegalTextOnSupplierReturns=Texte libre sur les retours fournisseurs
+FreeLegalTextOnSupplierReturnsHelp=Texte libre à insérer sur chaque document de retour
+ConfigureExtraFields=Configurer les champs additionnels
+ConfigureExtraFieldsLines=Configurer les champs additionnels des lignes
+ExtraFieldsLines=Champs additionnels (lignes)
+StandardNumbering=Numérotation standard
+SimpleNumRefModelDesc=Modèle simple avec préfixe %s
+Activated=Activé
+Disabled=Désactivé
+NextValue=Prochaine valeur
+Version=Version
+SetupSaved=Configuration sauvegardée
