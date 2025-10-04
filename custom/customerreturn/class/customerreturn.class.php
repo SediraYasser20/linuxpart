@@ -500,42 +500,6 @@ class CustomerReturn extends CommonObject
         return -1;
     }
 
-    public function close($user, $notrigger = 0)
-    {
-        $allowed_statuses_to_close = array(
-            self::STATUS_RETURNED_TO_SUPPLIER,
-            self::STATUS_CHANGED_PRODUCT_FOR_CLIENT,
-            self::STATUS_REIMBURSED_MONEY_TO_CLIENT
-        );
-
-        if (!in_array($this->statut, $allowed_statuses_to_close)) {
-            $this->error = 'CustomerReturn is not in a closable status. Current status: '.$this->statut;
-            dol_syslog(__METHOD__." Error: ".$this->error, LOG_ERR);
-            return -1;
-        }
-
-        $this->db->begin();
-
-        $sql = "UPDATE ".MAIN_DB_PREFIX."customerreturn SET statut = ".self::STATUS_CLOSED.", date_process = '".$this->db->idate(dol_now())."' WHERE rowid = ".(int) $this->id;
-
-        if ($this->db->query($sql)) {
-            if (!$notrigger) {
-                if ($this->call_trigger('CUSTOMERRETURN_CLOSE', $user) < 0) {
-                    $this->db->rollback();
-                    return -1;
-                }
-            }
-            $this->db->commit();
-            $this->statut = self::STATUS_CLOSED;
-            return 1;
-        }
-
-        $this->error = $this->db->lasterror();
-        dol_syslog(__METHOD__." Error: ".$this->error, LOG_ERR);
-        $this->db->rollback();
-        return -1;
-    }
-
  public function updateStock($line, $user)
     {
         global $conf, $langs;

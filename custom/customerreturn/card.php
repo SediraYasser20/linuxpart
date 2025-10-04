@@ -177,23 +177,6 @@ if (empty($reshook)) {
         }
     }
 
-    // Close action
-    if ($action == 'confirm_close' && $confirm == 'yes') {
-        if (!$user->hasRight('customerreturn', 'creer') && !$user->admin) {
-            setEventMessages($langs->trans("NotEnoughPermissions"), null, 'errors');
-            $action = '';
-        } else {
-            $result = $object->close($user);
-            if ($result > 0) {
-                setEventMessages($langs->trans('CustomerReturnClosed'), null, 'mesgs');
-                header("Location: ".$_SERVER['PHP_SELF']."?id=".$object->id);
-                exit;
-            } else {
-                setEventMessages($object->error, $object->errors, 'errors');
-                $action = '';
-            }
-        }
-    }
 }
 
 /*
@@ -238,11 +221,6 @@ if ($action == 'setchangedproductforclient') {
 if ($action == 'setreimbursedmoneytoclient') {
     $text = $langs->trans('ConfirmSetReimbursedMoneyToClient');
     print $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('SetReimbursedMoneyToClient'), $text, 'confirm_setreimbursedmoneytoclient', '', 0, 1);
-}
-
-if ($action == 'close') {
-    $text = $langs->trans('ConfirmCloseCustomerReturn');
-    print $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('CloseCustomerReturn'), $text, 'confirm_close', '', 0, 1);
 }
 
 // Object card
@@ -400,20 +378,10 @@ if ($object->statut == CustomerReturn::STATUS_DRAFT) {
 
 if ($object->statut == CustomerReturn::STATUS_VALIDATED) {
     if ($usercanvalidate) {
-        print '<div class="inline-block butAction" title="'.$langs->trans('SetReturnedToSupplier').'"><a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=setreturnedtosupplier&token='.newToken().'">'.$langs->trans('ReturnedToSupplier').'</a></div>';
-        print '<div class="inline-block butAction" title="'.$langs->trans('SetChangedProductForClient').'"><a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=setchangedproductforclient&token='.newToken().'">'.$langs->trans('ChangedProductForClient').'</a></div>';
-        print '<div class="inline-block butAction" title="'.$langs->trans('SetReimbursedMoneyToClient').'"><a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=setreimbursedmoneytoclient&token='.newToken().'">'.$langs->trans('ReimbursedMoneyToClient').'</a></div>';
+        print '<div class="inline-block" title="'.$langs->trans('SetReturnedToSupplier').'"><a class="butAction btn-primary" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=setreturnedtosupplier&token='.newToken().'">'.$langs->trans('ReturnedToSupplier').'</a></div>';
+        print '<div class="inline-block" title="'.$langs->trans('SetChangedProductForClient').'"><a class="butAction btn-secondary" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=setchangedproductforclient&token='.newToken().'">'.$langs->trans('ChangedProductForClient').'</a></div>';
+        print '<div class="inline-block" title="'.$langs->trans('SetReimbursedMoneyToClient').'"><a class="butAction btn-success" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=setreimbursedmoneytoclient&token='.newToken().'">'.$langs->trans('ReimbursedMoneyToClient').'</a></div>';
     }
-}
-
-$closable_statuses = array(
-    CustomerReturn::STATUS_RETURNED_TO_SUPPLIER,
-    CustomerReturn::STATUS_CHANGED_PRODUCT_FOR_CLIENT,
-    CustomerReturn::STATUS_REIMBURSED_MONEY_TO_CLIENT
-);
-
-if (in_array($object->statut, $closable_statuses) && $usercanvalidate) {
-    print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=close&token='.newToken().'">'.$langs->trans('Close').'</a>';
 }
 
 if ($object->statut == CustomerReturn::STATUS_CLOSED && empty($object->fk_facture)) {

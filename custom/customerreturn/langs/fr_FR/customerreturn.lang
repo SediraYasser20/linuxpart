@@ -43,6 +43,9 @@ CustomerReturnStatusDraft=Brouillon
 CustomerReturnStatusValidated=Validé
 CustomerReturnStatusProcessed=Traité
 CustomerReturnStatusCanceled=Annulé
+CustomerReturnStatusReturnedToSupplier=Retourné au fournisseur
+CustomerReturnStatusChangedProductForClient=Produit échangé pour le client
+CustomerReturnStatusReimbursedMoneyToClient=Client remboursé
 
 # Actions/Buttons
 Process=Traiter
@@ -50,6 +53,10 @@ ProcessCustomerReturn=Traiter le retour
 CreateCreditNote=Créer avoir
 ValidateCustomerReturn=Valider le retour
 CancelCustomerReturn=Annuler le retour
+ReturnedToSupplier=Retourné au fournisseur
+ChangedProductForClient=Produit échangé
+ReimbursedMoneyToClient=Client remboursé
+SetToDraft=Rouvrir
 
 # Setup / Configuration
 CustomerReturnSetup=Configuration retours clients
@@ -115,8 +122,19 @@ CustomerReturnModified=Retour client modifié
 CustomerReturnValidated=Retour client validé
 CustomerReturnProcessed=Retour client traité
 CreditNoteCreated=Facture d'avoir créée avec succès
+CustomerReturnReturnedToSupplier=Statut du retour client mis à 'Retourné au fournisseur'
+CustomerReturnChangedProductForClient=Statut du retour client mis à 'Produit échangé pour le client'
+CustomerReturnReimbursedMoneyToClient=Statut du retour client mis à 'Client remboursé'
+CustomerReturnSetToDraft=Retour client rouvert en brouillon
 ConfirmValidateCustomerReturn=Êtes-vous sûr de vouloir valider ce retour client ?
 ConfirmProcessCustomerReturn=Êtes-vous sûr de vouloir traiter ce retour ? Cette action mettra à jour le stock.
+ConfirmSetCustomerReturnToDraft=Êtes-vous sûr de vouloir rouvrir ce retour en brouillon ?
+ConfirmSetReturnedToSupplier=Êtes-vous sûr de vouloir définir ce retour comme 'Retourné au fournisseur' ?
+SetReturnedToSupplier=Définir comme 'Retourné au fournisseur'
+ConfirmSetChangedProductForClient=Êtes-vous sûr de vouloir définir ce retour comme 'Produit échangé pour le client' ?
+SetChangedProductForClient=Définir comme 'Produit échangé pour le client'
+ConfirmSetReimbursedMoneyToClient=Êtes-vous sûr de vouloir définir ce retour comme 'Client remboursé' ?
+SetReimbursedMoneyToClient=Définir comme 'Client remboursé'
 
 # Administration
 Settings=Configuration
