@@ -75,7 +75,7 @@ if ($tab == 'general') {
                 $modulename = 'mod_'.$reg[1];
                 require_once $dir.$file;
                 $module = new $modulename($db);
-                print '<tr class="oddeven"><td>'.$module->name.'</td><td>'.$module->info().'</td>';
+                print '<tr class="oddeven"><td>'.$module->name.'</td><td>'.$module->info($langs).'</td>';
                 print '<td class="center">';
                 if (getDolGlobalString('CUSTOMERRETURN_ADDON') == $modulename) {
                     print img_picto($langs->trans("Activated"), 'switch_on');

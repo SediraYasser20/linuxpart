@@ -88,24 +88,6 @@ if (empty($reshook)) {
         }
     }
 
-    // Process action
-    if ($action == 'confirm_process' && $confirm == 'yes') {
-        if (!$user->hasRight('customerreturn', 'creer') && !$user->admin) {
-            setEventMessages($langs->trans("NotEnoughPermissions"), null, 'errors');
-            $action = '';
-        } else {
-            $result = $object->process($user);
-            if ($result > 0) {
-                setEventMessages($langs->trans("CustomerReturnProcessed"), null, 'mesgs');
-                header("Location: ".$_SERVER['PHP_SELF']."?id=".$object->id);
-                exit;
-            } else {
-                setEventMessages($object->error, $object->errors, 'errors');
-                $action = '';
-            }
-        }
-    }
-
     // Create credit note action
     if ($action == 'confirm_createcreditnote' && $confirm == 'yes') {
         if (!$user->hasRight('customerreturn', 'creer') && !$user->admin) {
@@ -140,6 +122,61 @@ if (empty($reshook)) {
             }
         }
     }
+
+    // Set returned to supplier
+    if ($action == 'confirm_setreturnedtosupplier' && $confirm == 'yes') {
+        if (!$user->hasRight('customerreturn', 'creer') && !$user->admin) {
+            setEventMessages($langs->trans("NotEnoughPermissions"), null, 'errors');
+            $action = '';
+        } else {
+            $result = $object->setReturnedToSupplier($user);
+            if ($result > 0) {
+                setEventMessages($langs->trans('CustomerReturnReturnedToSupplier'), null, 'mesgs');
+                header("Location: ".$_SERVER['PHP_SELF']."?id=".$object->id);
+                exit;
+            } else {
+                setEventMessages($object->error, $object->errors, 'errors');
+                $action = '';
+            }
+        }
+    }
+
+    // Set changed product for client
+    if ($action == 'confirm_setchangedproductforclient' && $confirm == 'yes') {
+        if (!$user->hasRight('customerreturn', 'creer') && !$user->admin) {
+            setEventMessages($langs->trans("NotEnoughPermissions"), null, 'errors');
+            $action = '';
+        } else {
+            $result = $object->setChangedProductForClient($user);
+            if ($result > 0) {
+                setEventMessages($langs->trans('CustomerReturnChangedProductForClient'), null, 'mesgs');
+                header("Location: ".$_SERVER['PHP_SELF']."?id=".$object->id);
+                exit;
+            } else {
+                setEventMessages($object->error, $object->errors, 'errors');
+                $action = '';
+            }
+        }
+    }
+
+    // Set reimbursed money to client
+    if ($action == 'confirm_setreimbursedmoneytoclient' && $confirm == 'yes') {
+        if (!$user->hasRight('customerreturn', 'creer') && !$user->admin) {
+            setEventMessages($langs->trans("NotEnoughPermissions"), null, 'errors');
+            $action = '';
+        } else {
+            $result = $object->setReimbursedMoneyToClient($user);
+            if ($result > 0) {
+                setEventMessages($langs->trans('CustomerReturnReimbursedMoneyToClient'), null, 'mesgs');
+                header("Location: ".$_SERVER['PHP_SELF']."?id=".$object->id);
+                exit;
+            } else {
+                setEventMessages($object->error, $object->errors, 'errors');
+                $action = '';
+            }
+        }
+    }
+
 }
 
 /*
@@ -161,20 +198,29 @@ if ($action == 'validate') {
     print $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('ValidateCustomerReturn'), $text, 'confirm_validate', '', 0, 1);
 }
 
-if ($action == 'process') {
-    $text = $langs->trans('ConfirmProcessCustomerReturn');
-    print $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('ProcessCustomerReturn'), $text, 'confirm_process', '', 0, 1);
-}
-
 if ($action == 'createcreditnote') {
     $text = $langs->trans('ConfirmCreateCreditNote');
     print $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('CreateCreditNote'), $text, 'confirm_createcreditnote', '', 0, 1);
 }
 
-// Confirmation dialog for back to draft
 if ($action == 'backtodraft') {
     $text = $langs->trans('ConfirmSetCustomerReturnToDraft');
     print $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('SetToDraft'), $text, 'confirm_backtodraft', '', 0, 1);
+}
+
+if ($action == 'setreturnedtosupplier') {
+    $text = $langs->trans('ConfirmSetReturnedToSupplier');
+    print $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('SetReturnedToSupplier'), $text, 'confirm_setreturnedtosupplier', '', 0, 1);
+}
+
+if ($action == 'setchangedproductforclient') {
+    $text = $langs->trans('ConfirmSetChangedProductForClient');
+    print $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('SetChangedProductForClient'), $text, 'confirm_setchangedproductforclient', '', 0, 1);
+}
+
+if ($action == 'setreimbursedmoneytoclient') {
+    $text = $langs->trans('ConfirmSetReimbursedMoneyToClient');
+    print $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('SetReimbursedMoneyToClient'), $text, 'confirm_setreimbursedmoneytoclient', '', 0, 1);
 }
 
 // Object card
@@ -332,7 +378,9 @@ if ($object->statut == CustomerReturn::STATUS_DRAFT) {
 
 if ($object->statut == CustomerReturn::STATUS_VALIDATED) {
     if ($usercanvalidate) {
-        print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=process&token='.newToken().'">'.$langs->trans('Process').'</a>';
+        print '<div class="inline-block" title="'.$langs->trans('SetReturnedToSupplier').'"><a class="butAction btn-primary" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=setreturnedtosupplier&token='.newToken().'">'.$langs->trans('ReturnedToSupplier').'</a></div>';
+        print '<div class="inline-block" title="'.$langs->trans('SetChangedProductForClient').'"><a class="butAction btn-secondary" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=setchangedproductforclient&token='.newToken().'">'.$langs->trans('ChangedProductForClient').'</a></div>';
+        print '<div class="inline-block" title="'.$langs->trans('SetReimbursedMoneyToClient').'"><a class="butAction btn-success" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=setreimbursedmoneytoclient&token='.newToken().'">'.$langs->trans('ReimbursedMoneyToClient').'</a></div>';
     }
 }
 
@@ -342,8 +390,15 @@ if ($object->statut == CustomerReturn::STATUS_CLOSED && empty($object->fk_factur
     }
 }
 
-// Show "Back to draft" button when record is validated or closed
-if (($object->statut == CustomerReturn::STATUS_VALIDATED || $object->statut == CustomerReturn::STATUS_CLOSED) && $usercanvalidate) {
+$reopenable_statuses = array(
+    CustomerReturn::STATUS_VALIDATED,
+    CustomerReturn::STATUS_RETURNED_TO_SUPPLIER,
+    CustomerReturn::STATUS_CHANGED_PRODUCT_FOR_CLIENT,
+    CustomerReturn::STATUS_REIMBURSED_MONEY_TO_CLIENT,
+    CustomerReturn::STATUS_CLOSED
+);
+
+if (in_array($object->statut, $reopenable_statuses) && $usercanvalidate) {
     if ($object->fk_facture > 0) {
         print '<span class="butActionRefused classfortooltip" title="'.dol_escape_htmltag($langs->trans("ErrorCreditNoteAlreadyCreated")).'">'.$langs->trans('SetToDraft').'</span>';
     } else {
@@ -426,4 +481,5 @@ print '<div class="clearboth"></div><br>';
 // End of page
 llxFooter();
 $db->close();
+
 

@@ -23,6 +23,65 @@ class ActionsCustomerreturn
         $this->db = $db;
     }
 
+    private function _createAgendaEvent(&$object, $eventLabelKey, $eventCode)
+    {
+        global $user, $langs;
+
+        require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
+
+        $action = new ActionComm($this->db);
+        $action->datep = dol_now();
+        $action->authorid = $user->id;
+        $action->fk_project = !empty($object->fk_project) ? $object->fk_project : null;
+        $action->socid = $object->fk_soc;
+
+        $action->type_code = 'AC_OTH';
+        $action->code = $eventCode;
+        $action->label = $langs->trans($eventLabelKey, $object->ref);
+
+        $action->elementtype = $object->element;
+        $action->fk_element = $object->id;
+        $action->userownerid = $user->id;
+
+        if ($action->create($user) > 0) {
+            return 0;
+        } else {
+            $this->error = $action->error;
+            $this->errors = $action->errors;
+            return -1;
+        }
+    }
+
+    public function CUSTOMERRETURN_CREATE($parameters, &$object, &$action, $hookmanager)
+    {
+        return $this->_createAgendaEvent($object, 'CustomerReturnCreated', 'CUSTOMERRETURN_CREATED');
+    }
+
+    public function CUSTOMERRETURN_MODIFY($parameters, &$object, &$action, $hookmanager)
+    {
+        return $this->_createAgendaEvent($object, 'CustomerReturnModified', 'CUSTOMERRETURN_MODIFIED');
+    }
+
+    public function CUSTOMERRETURN_VALIDATE($parameters, &$object, &$action, $hookmanager)
+    {
+        return $this->_createAgendaEvent($object, 'CustomerReturnValidated', 'CUSTOMERRETURN_VALIDATED');
+    }
+
+    public function CUSTOMERRETURN_PROCESS($parameters, &$object, &$action, $hookmanager)
+    {
+        return $this->_createAgendaEvent($object, 'CustomerReturnProcessed', 'CUSTOMERRETURN_PROCESSED');
+    }
+
+    public function CUSTOMERRETURN_BACKTODRAFT($parameters, &$object, &$action, $hookmanager)
+    {
+        return $this->_createAgendaEvent($object, 'CustomerReturnBackToDraft', 'CUSTOMERRETURN_BACKTODRAFT');
+    }
+
+    public function CUSTOMERRETURN_DELETE($parameters, &$object, &$action, $hookmanager)
+    {
+        return $this->_createAgendaEvent($object, 'CustomerReturnDeleted', 'CUSTOMERRETURN_DELETED');
+    }
+
     public function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager)
     {
         global $user, $langs;

@@ -106,6 +106,7 @@ CustomerReturnModified=Customer return modified
 CustomerReturnValidated=Customer return validated
 CustomerReturnProcessed=Customer return processed
 CreditNoteCreated=Credit note created successfully
+CustomerReturnCreditNoteCreated=Credit note created for customer return %s
 ConfirmValidateCustomerReturn=Are you sure you want to validate this customer return?
 ConfirmProcessCustomerReturn=Are you sure you want to process this return? This action will update stock.
 
