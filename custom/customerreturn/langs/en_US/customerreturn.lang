@@ -85,6 +85,10 @@ ReturnedToSupplier=Returned to supplier
 ChangedProductForClient=Changed product for client
 ReimbursedMoneyToClient=Reimbursed money to client
 SetToDraft=Re-open
+All=All
+Search=Search
+RemoveFilter=Remove filter
+Total=Total
 
 # Return Reasons - Common motifs
 wrong_product=Wrong product shipped

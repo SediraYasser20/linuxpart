@@ -57,6 +57,10 @@ ReturnedToSupplier=Retourné au fournisseur
 ChangedProductForClient=Produit échangé
 ReimbursedMoneyToClient=Client remboursé
 SetToDraft=Rouvrir
+All=Tous
+Search=Rechercher
+RemoveFilter=Supprimer le filtre
+Total=Total
 
 # Setup / Configuration
 CustomerReturnSetup=Configuration retours clients
