@@ -119,7 +119,24 @@ class modCustomerreturn extends DolibarrModules
             'prefix' => img_picto('', $this->picto, 'class="paddingright pictofixedwidth"'),
             'mainmenu' => 'customerreturn',
             'leftmenu' => '',
-            'url' => '/custom/customerreturn/list.php',
+            'url' => '/custom/customerreturn/dashboard.php',
+            'langs' => 'customerreturn@customerreturn',
+            'position' => 1000 + $r,
+            'enabled' => 'isModEnabled("customerreturn")',
+            'perms' => '$user->rights->customerreturn->lire',
+            'target' => '',
+            'user' => 2,
+        );
+
+        // ---- LEFT MENU: Dashboard ----
+        $r++;
+        $this->menu[$r] = array(
+            'fk_menu' => 'fk_mainmenu=customerreturn',
+            'type' => 'left',
+            'titre' => 'Dashboard',
+            'mainmenu' => 'customerreturn',
+            'leftmenu' => 'dashboard',
+            'url' => '/custom/customerreturn/dashboard.php',
             'langs' => 'customerreturn@customerreturn',
             'position' => 1000 + $r,
             'enabled' => 'isModEnabled("customerreturn")',
@@ -135,7 +152,7 @@ class modCustomerreturn extends DolibarrModules
             'type' => 'left',
             'titre' => 'List',
             'mainmenu' => 'customerreturn',
-            'leftmenu' => '',
+            'leftmenu' => 'list',
             'url' => '/custom/customerreturn/list.php',
             'langs' => 'customerreturn@customerreturn',
             'position' => 1000 + $r,
@@ -152,7 +169,7 @@ class modCustomerreturn extends DolibarrModules
             'type' => 'left',
             'titre' => 'NewCustomerReturn',
             'mainmenu' => 'customerreturn',
-            'leftmenu' => '',
+            'leftmenu' => 'new',
             'url' => '/custom/customerreturn/create_from_shipment.php',
             'langs' => 'customerreturn@customerreturn',
             'position' => 1000 + $r,
