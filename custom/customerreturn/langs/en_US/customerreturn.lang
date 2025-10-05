@@ -38,9 +38,6 @@ ValidateReturn=Validate return
 
 # Status
 CustomerReturnStatusDraft=Draft
-CustomerReturnStatusReturnedToSupplier=Returned to supplier
-CustomerReturnStatusChangedProductForClient=Changed product for client
-CustomerReturnStatusReimbursedMoneyToClient=Reimbursed money to client
 
 # Return Reasons Administration
 ReturnReasonKey=Reason key
@@ -81,12 +78,6 @@ ProcessCustomerReturn=Process return
 CreateCreditNote=Create credit note
 ValidateCustomerReturn=Validate return
 CancelCustomerReturn=Cancel return
-ReturnedToSupplier=Returned to supplier
-ChangedProductForClient=Changed product for client
-ReimbursedMoneyToClient=Reimbursed money to client
-Close=Close
-SetToDraft=Re-open
-CloseCustomerReturn=Close customer return
 
 # Return Reasons - Common motifs
 wrong_product=Wrong product shipped
@@ -115,20 +106,9 @@ CustomerReturnModified=Customer return modified
 CustomerReturnValidated=Customer return validated
 CustomerReturnProcessed=Customer return processed
 CreditNoteCreated=Credit note created successfully
-CustomerReturnReturnedToSupplier=Return status set to 'Returned to supplier'
-CustomerReturnChangedProductForClient=Return status set to 'Changed product for client'
-CustomerReturnReimbursedMoneyToClient=Return status set to 'Reimbursed money to client'
-CustomerReturnClosed=Customer return closed
-CustomerReturnSetToDraft=Customer return re-opened to draft status
+CustomerReturnCreditNoteCreated=Credit note created for customer return %s
 ConfirmValidateCustomerReturn=Are you sure you want to validate this customer return?
-ConfirmSetCustomerReturnToDraft=Are you sure you want to re-open this return to draft status?
-ConfirmSetReturnedToSupplier=Are you sure you want to set this return as 'Returned to supplier'?
-SetReturnedToSupplier=Set as 'Returned to supplier'
-ConfirmSetChangedProductForClient=Are you sure you want to set this return as 'Changed product for client'?
-SetChangedProductForClient=Set as 'Changed product for client'
-ConfirmSetReimbursedMoneyToClient=Are you sure you want to set this return as 'Reimbursed money to client'?
-SetReimbursedMoneyToClient=Set as 'Reimbursed money to client'
-ConfirmCloseCustomerReturn=Are you sure you want to close this customer return?
+ConfirmProcessCustomerReturn=Are you sure you want to process this return? This action will update stock.
 
 # From Shipment Interface
 CreateReturnFromShipment=Create return from shipment

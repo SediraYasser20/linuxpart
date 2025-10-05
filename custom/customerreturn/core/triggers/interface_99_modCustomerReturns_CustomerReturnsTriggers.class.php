@@ -44,6 +44,8 @@ class InterfaceCustomerReturnsTriggers extends DolibarrTriggers
 				return $this->customerReturnValidate($action, $object, $user, $langs, $conf);
 			case 'CUSTOMERRETURN_CLOSE':
 				return $this->customerReturnClose($action, $object, $user, $langs, $conf);
+			case 'CUSTOMERRETURN_CREDIT_NOTE_CREATED':
+				return $this->customerReturnCreditNoteCreated($action, $object, $user, $langs, $conf);
 			default:
 				return 0;
 		}
@@ -79,6 +81,18 @@ class InterfaceCustomerReturnsTriggers extends DolibarrTriggers
 			$sql = "INSERT INTO ".MAIN_DB_PREFIX."actioncomm (datec, datep, type_code, code, label, fk_soc, fk_element, elementtype, userownerid, entity) VALUES (";
 			$sql .= "'".$this->db->idate(dol_now())."', '".$this->db->idate(dol_now())."', 'AC_OTH_AUTO', 'AC_OTH_AUTO', ";
 			$sql .= "'".$this->db->escape($langs->trans('CustomerReturnClosed', $object->ref))."', ";
+			$sql .= (int) $object->fk_soc.", ".(int) $object->id.", '".$this->db->escape($object->element.'@customerreturn')."', ".(int) $user->id.", 1)";
+			$this->db->query($sql);
+		}
+		return 1;
+	}
+
+	private function customerReturnCreditNoteCreated($action, $object, User $user, Translate $langs, Conf $conf)
+	{
+		if (isModEnabled('agenda')) {
+			$sql = "INSERT INTO ".MAIN_DB_PREFIX."actioncomm (datec, datep, type_code, code, label, fk_soc, fk_element, elementtype, userownerid, entity) VALUES (";
+			$sql .= "'".$this->db->idate(dol_now())."', '".$this->db->idate(dol_now())."', 'AC_OTH_AUTO', 'AC_OTH_AUTO', ";
+			$sql .= "'".$this->db->escape($langs->trans('CustomerReturnCreditNoteCreated', $object->ref))."', ";
 			$sql .= (int) $object->fk_soc.", ".(int) $object->id.", '".$this->db->escape($object->element.'@customerreturn')."', ".(int) $user->id.", 1)";
 			$this->db->query($sql);
 		}

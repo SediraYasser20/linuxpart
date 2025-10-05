@@ -110,6 +110,7 @@ CustomerReturnsCanceled=Retours annulés
 AllCustomerReturns=Tous les retours
 
 # Messages
+CustomerReturnCreditNoteCreated=Avoir créé pour le retour client %s
 CustomerReturnCreated=Retour client créé
 CustomerReturnModified=Retour client modifié
 CustomerReturnValidated=Retour client validé

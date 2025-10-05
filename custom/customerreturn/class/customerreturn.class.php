@@ -49,9 +49,6 @@ class CustomerReturn extends CommonObject
     const STATUS_DRAFT = 0;
     const STATUS_VALIDATED = 1;
     const STATUS_CLOSED = 2;
-    const STATUS_RETURNED_TO_SUPPLIER = 3;
-    const STATUS_CHANGED_PRODUCT_FOR_CLIENT = 4;
-    const STATUS_REIMBURSED_MONEY_TO_CLIENT = 5;
 
     public function __construct($db)
     {
@@ -364,15 +361,6 @@ class CustomerReturn extends CommonObject
             return -1;
         }
 
-        foreach ($this->lines as $line) {
-            if ($line->fk_product > 0 && $line->qty > 0) {
-                if ($this->updateStock($line, $user) < 0) {
-                    $this->db->rollback();
-                    return -1;
-                }
-            }
-        }
-
         $sql = "UPDATE ".MAIN_DB_PREFIX."customerreturn SET";
         $sql .= " statut = ".self::STATUS_VALIDATED;
         $sql .= ", ref = '".$this->db->escape($new_ref)."'";
@@ -410,126 +398,34 @@ class CustomerReturn extends CommonObject
         return -1;
     }
 
-    public function setReturnedToSupplier($user, $notrigger = 0)
+
+    public function process($user, $notrigger = 0)
     {
         if ($this->statut != self::STATUS_VALIDATED) {
             $this->error = 'CustomerReturn is not in validated status';
             dol_syslog(__METHOD__." Error: ".$this->error, LOG_ERR);
             return -1;
         }
-
         $this->db->begin();
-
-        $sql = "UPDATE ".MAIN_DB_PREFIX."customerreturn SET statut = ".self::STATUS_RETURNED_TO_SUPPLIER." WHERE rowid = ".(int) $this->id;
-
-        if ($this->db->query($sql)) {
-            if (!$notrigger) {
-                if ($this->call_trigger('CUSTOMERRETURN_RETURNED_TO_SUPPLIER', $user) < 0) {
+        foreach ($this->lines as $line) {
+            if ($line->fk_product > 0 && $line->qty > 0) {
+                if ($this->updateStock($line, $user) < 0) {
                     $this->db->rollback();
                     return -1;
                 }
             }
-            $this->db->commit();
-            $this->statut = self::STATUS_RETURNED_TO_SUPPLIER;
-            return 1;
         }
-
-        $this->error = $this->db->lasterror();
-        dol_syslog(__METHOD__." Error: ".$this->error, LOG_ERR);
-        $this->db->rollback();
-        return -1;
-    }
-
-    public function setChangedProductForClient($user, $notrigger = 0)
-    {
-        if ($this->statut != self::STATUS_VALIDATED) {
-            $this->error = 'CustomerReturn is not in validated status';
-            dol_syslog(__METHOD__." Error: ".$this->error, LOG_ERR);
-            return -1;
-        }
-
-        $this->db->begin();
-
-        $sql = "UPDATE ".MAIN_DB_PREFIX."customerreturn SET statut = ".self::STATUS_CHANGED_PRODUCT_FOR_CLIENT." WHERE rowid = ".(int) $this->id;
-
-        if ($this->db->query($sql)) {
-            if (!$notrigger) {
-                if ($this->call_trigger('CUSTOMERRETURN_CHANGED_PRODUCT_FOR_CLIENT', $user) < 0) {
-                    $this->db->rollback();
-                    return -1;
-                }
-            }
-            $this->db->commit();
-            $this->statut = self::STATUS_CHANGED_PRODUCT_FOR_CLIENT;
-            return 1;
-        }
-
-        $this->error = $this->db->lasterror();
-        dol_syslog(__METHOD__." Error: ".$this->error, LOG_ERR);
-        $this->db->rollback();
-        return -1;
-    }
-
-    public function setReimbursedMoneyToClient($user, $notrigger = 0)
-    {
-        if ($this->statut != self::STATUS_VALIDATED) {
-            $this->error = 'CustomerReturn is not in validated status';
-            dol_syslog(__METHOD__." Error: ".$this->error, LOG_ERR);
-            return -1;
-        }
-
-        $this->db->begin();
-
-        $sql = "UPDATE ".MAIN_DB_PREFIX."customerreturn SET statut = ".self::STATUS_REIMBURSED_MONEY_TO_CLIENT." WHERE rowid = ".(int) $this->id;
-
-        if ($this->db->query($sql)) {
-            if (!$notrigger) {
-                if ($this->call_trigger('CUSTOMERRETURN_REIMBURSED_MONEY_TO_CLIENT', $user) < 0) {
-                    $this->db->rollback();
-                    return -1;
-                }
-            }
-            $this->db->commit();
-            $this->statut = self::STATUS_REIMBURSED_MONEY_TO_CLIENT;
-            return 1;
-        }
-
-        $this->error = $this->db->lasterror();
-        dol_syslog(__METHOD__." Error: ".$this->error, LOG_ERR);
-        $this->db->rollback();
-        return -1;
-    }
-
-    public function close($user, $notrigger = 0)
-    {
-        $allowed_statuses_to_close = array(
-            self::STATUS_RETURNED_TO_SUPPLIER,
-            self::STATUS_CHANGED_PRODUCT_FOR_CLIENT,
-            self::STATUS_REIMBURSED_MONEY_TO_CLIENT
-        );
-
-        if (!in_array($this->statut, $allowed_statuses_to_close)) {
-            $this->error = 'CustomerReturn is not in a closable status. Current status: '.$this->statut;
-            dol_syslog(__METHOD__." Error: ".$this->error, LOG_ERR);
-            return -1;
-        }
-
-        $this->db->begin();
-
         $sql = "UPDATE ".MAIN_DB_PREFIX."customerreturn SET statut = ".self::STATUS_CLOSED.", date_process = '".$this->db->idate(dol_now())."' WHERE rowid = ".(int) $this->id;
-
         if ($this->db->query($sql)) {
             if (!$notrigger) {
-                if ($this->call_trigger('CUSTOMERRETURN_CLOSE', $user) < 0) {
+                if ($this->call_trigger('CUSTOMERRETURN_PROCESS', $user) < 0) {
                     $this->db->rollback();
                     return -1;
                 }
             }
             $this->db->commit();
-            $this->statut = self::STATUS_CLOSED;
             return 1;
         }
-
         $this->error = $this->db->lasterror();
         dol_syslog(__METHOD__." Error: ".$this->error, LOG_ERR);
         $this->db->rollback();
@@ -582,8 +478,6 @@ class CustomerReturn extends CommonObject
             $statusType = 'status0';
         } elseif ($status == self::STATUS_VALIDATED) {
             $statusType = 'status4';
-        } elseif ($status == self::STATUS_RETURNED_TO_SUPPLIER || $status == self::STATUS_CHANGED_PRODUCT_FOR_CLIENT || $status == self::STATUS_REIMBURSED_MONEY_TO_CLIENT) {
-            $statusType = 'status5';
         } elseif ($status == self::STATUS_CLOSED) {
             $statusType = 'status6';
         } else {
@@ -593,10 +487,7 @@ class CustomerReturn extends CommonObject
         $statusLabels = array(
             self::STATUS_DRAFT => $langs->trans('Draft'),
             self::STATUS_VALIDATED => $langs->trans('Validated'),
-            self::STATUS_CLOSED => $langs->trans('Closed'),
-            self::STATUS_RETURNED_TO_SUPPLIER => $langs->trans('CustomerReturnStatusReturnedToSupplier'),
-            self::STATUS_CHANGED_PRODUCT_FOR_CLIENT => $langs->trans('CustomerReturnStatusChangedProductForClient'),
-            self::STATUS_REIMBURSED_MONEY_TO_CLIENT => $langs->trans('CustomerReturnStatusReimbursedMoneyToClient')
+            self::STATUS_CLOSED => $langs->trans('Closed')
         );
 
         $statusLabel = isset($statusLabels[$status]) ? $statusLabels[$status] : 'Unknown';
@@ -681,6 +572,9 @@ class CustomerReturn extends CommonObject
             }
             $this->db->query("UPDATE ".MAIN_DB_PREFIX."customerreturn SET fk_facture = ".$result." WHERE rowid = ".$this->id);
             $this->add_object_linked('facture', $result);
+
+            $this->call_trigger('CUSTOMERRETURN_CREDIT_NOTE_CREATED', $user);
+
             return $result;
         }
         $this->error = $creditnote->error;
@@ -700,15 +594,7 @@ public function backToDraft($user, $notrigger = false)
 
     $this->db->begin();
 
-    $stock_reversal_statuses = array(
-        self::STATUS_VALIDATED,
-        self::STATUS_RETURNED_TO_SUPPLIER,
-        self::STATUS_CHANGED_PRODUCT_FOR_CLIENT,
-        self::STATUS_REIMBURSED_MONEY_TO_CLIENT,
-        self::STATUS_CLOSED
-    );
-
-    if (in_array($this->statut, $stock_reversal_statuses)) {
+    if ($this->statut == self::STATUS_CLOSED) {
         foreach ($this->lines as $line) {
             if ($line->fk_product > 0 && $line->qty > 0) {
                 if ($this->reverseStock($line, $user) < 0) {
