@@ -84,11 +84,9 @@ CancelCustomerReturn=Cancel return
 ReturnedToSupplier=Returned to supplier
 ChangedProductForClient=Changed product for client
 ReimbursedMoneyToClient=Reimbursed money to client
+Close=Close
 SetToDraft=Re-open
-All=All
-Search=Search
-RemoveFilter=Remove filter
-Total=Total
+CloseCustomerReturn=Close customer return
 
 # Return Reasons - Common motifs
 wrong_product=Wrong product shipped
@@ -130,6 +128,7 @@ ConfirmSetChangedProductForClient=Are you sure you want to set this return as 'C
 SetChangedProductForClient=Set as 'Changed product for client'
 ConfirmSetReimbursedMoneyToClient=Are you sure you want to set this return as 'Reimbursed money to client'?
 SetReimbursedMoneyToClient=Set as 'Reimbursed money to client'
+ConfirmCloseCustomerReturn=Are you sure you want to close this customer return?
 
 # From Shipment Interface
 CreateReturnFromShipment=Create return from shipment

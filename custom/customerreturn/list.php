@@ -36,11 +36,9 @@ if ($user->socid) $socid = $user->socid;
 
 $search_ref = GETPOST('search_ref', 'alpha');
 $search_company = GETPOST('search_company', 'alpha');
-$search_status = GETPOST('search_status', 'alpha'); // Can be '0'
-$search_date_start = dol_mktime(0, 0, 0, GETPOST('search_date_startmonth', 'int'), GETPOST('search_date_startday', 'int'), GETPOST('search_date_startyear', 'int'));
-$search_date_end = dol_mktime(23, 59, 59, GETPOST('search_date_endmonth', 'int'), GETPOST('search_date_endday', 'int'), GETPOST('search_date_endyear', 'int'));
+$search_status = GETPOST('search_status', 'intcomma');
 
-$sortfield = GETPOST('sortfield', 'aZ09comma') ?: 't.date_return';
+$sortfield = GETPOST('sortfield', 'aZ09comma') ?: 't.ref';
 $sortorder = GETPOST('sortorder', 'aZ09comma') ?: 'DESC';
 $page = GETPOSTINT('page', 'int') >= 0 ? GETPOSTINT('page', 'int') : 0;
 if (GETPOST('button_search', 'alpha') || GETPOST('button_removefilter', 'alpha')) $page = 0;
@@ -50,7 +48,6 @@ $offset = $limit * $page;
 $form = new Form($db);
 $object = new CustomerReturn($db);
 
-// Build SQL query
 $sql = "SELECT t.rowid, t.ref, t.fk_soc, t.date_creation, t.date_return, t.statut, t.total_ht, s.nom as company_name";
 $sql .= " FROM ".MAIN_DB_PREFIX."customerreturn as t";
 $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON t.fk_soc = s.rowid";
@@ -59,38 +56,23 @@ $sql .= " WHERE t.entity = ".$conf->entity;
 if ($socid > 0) $sql .= " AND t.fk_soc = ".(int) $socid;
 if ($search_ref) $sql .= natural_search('t.ref', $search_ref);
 if ($search_company) $sql .= natural_search('s.nom', $search_company);
-if ($search_status != '' && $search_status != '-1') $sql .= " AND t.statut = '".$db->escape($search_status)."'";
-if ($search_date_start) $sql .= " AND t.date_return >= '".$db->idate($search_date_start)."'";
-if ($search_date_end) $sql .= " AND t.date_return <= '".$db->idate($search_date_end)."'";
+if ($search_status != '' && $search_status != '-1') $sql .= " AND t.statut IN (".$db->sanitize($search_status).")";
 
-// Calculate total
-$sql_sum = preg_replace('/SELECT(.*?)FROM/', 'SELECT SUM(t.total_ht) as total FROM', $sql);
-$resql_sum = $db->query($sql_sum);
-$total_ht = 0;
-if ($resql_sum) {
-    $obj_sum = $db->fetch_object($resql_sum);
-    $total_ht = $obj_sum->total;
-}
-
-// Count total number of records
 $sql_count = preg_replace('/SELECT(.*?)FROM/', 'SELECT COUNT(*) as nbtotalofrecords FROM', $sql);
+
 $resql_count = $db->query($sql_count);
 $nbtotalofrecords = $db->fetch_object($resql_count)->nbtotalofrecords;
 
-// Add sorting and limit
 $sql .= $db->order($sortfield, $sortorder);
 $sql .= $db->plimit($limit + 1, $offset);
 
 $resql = $db->query($sql);
 $num = $db->num_rows($resql);
 
-// Build query string for pagination
 $param = '&socid='.$socid;
 if ($search_ref) $param .= '&search_ref='.urlencode($search_ref);
 if ($search_company) $param .= '&search_company='.urlencode($search_company);
 if ($search_status != '' && $search_status != '-1') $param .= '&search_status='.urlencode($search_status);
-if ($search_date_start) $param .= '&search_date_startday='.GETPOST('search_date_startday', 'int').'&search_date_startmonth='.GETPOST('search_date_startmonth', 'int').'&search_date_startyear='.GETPOST('search_date_startyear', 'int');
-if ($search_date_end) $param .= '&search_date_endday='.GETPOST('search_date_endday', 'int').'&search_date_endmonth='.GETPOST('search_date_endmonth', 'int').'&search_date_endyear='.GETPOST('search_date_endyear', 'int');
 
 llxHeader('', $langs->trans('CustomerReturnsList'));
 
@@ -109,26 +91,14 @@ print_liste_field_titre($langs->trans('AmountHT'), $_SERVER["PHP_SELF"], "t.tota
 print_liste_field_titre($langs->trans('Status'), $_SERVER["PHP_SELF"], "t.statut", "", $param, 'align="center"', $sortfield, $sortorder);
 print '</tr>';
 
-// Filter row
 print '<tr class="liste_titre_filter">';
 print '<td><input class="flat" type="text" name="search_ref" value="'.dol_escape_htmltag($search_ref).'"></td>';
 print '<td><input class="flat" type="text" name="search_company" value="'.dol_escape_htmltag($search_company).'"></td>';
+print '<td></td>';
+print '<td></td>';
 print '<td class="center">';
-print $form->select_date(GETPOST('search_date_start', 'int') ? dol_mktime(0, 0, 0, GETPOST('search_date_startmonth', 'int'), GETPOST('search_date_startday', 'int'), GETPOST('search_date_startyear', 'int')) : '', 'search_date_start', 0, 0, 1, '', 1, 0, 1);
-print $form->select_date(GETPOST('search_date_end', 'int') ? dol_mktime(0, 0, 0, GETPOST('search_date_endmonth', 'int'), GETPOST('search_date_endday', 'int'), GETPOST('search_date_endyear', 'int')) : '', 'search_date_end', 0, 0, 1, '', 1, 0, 1);
-print '</td>';
-print '<td class="right"><button type="submit" class="button_search" name="button_search">'.$langs->trans("Search").'</button> <button type="submit" class="button_removefilter" name="button_removefilter">'.$langs->trans("RemoveFilter").'</button></td>';
-print '<td class="center">';
-$status_list = array(
-    '-1' => $langs->trans('All'),
-    CustomerReturn::STATUS_DRAFT => $langs->trans('Draft'),
-    CustomerReturn::STATUS_VALIDATED => $langs->trans('Validated'),
-    CustomerReturn::STATUS_RETURNED_TO_SUPPLIER => $langs->trans('CustomerReturnStatusReturnedToSupplier'),
-    CustomerReturn::STATUS_CHANGED_PRODUCT_FOR_CLIENT => $langs->trans('CustomerReturnStatusChangedProductForClient'),
-    CustomerReturn::STATUS_REIMBURSED_MONEY_TO_CLIENT => $langs->trans('CustomerReturnStatusReimbursedMoneyToClient'),
-    CustomerReturn::STATUS_CLOSED => $langs->trans('Closed'),
-);
-print $form->selectarray('search_status', $status_list, $search_status, 0, 0, 0, '', 0, 0, 0, '', 'maxwidth100', 1);
+$status_list = array('0' => $langs->trans('Draft'), '1' => $langs->trans('Validated'), '2' => $langs->trans('Processed'));
+print $form->selectarray('search_status', $status_list, $search_status, 1, 0, 0, '', 0, 0, 0, '', 'maxwidth100', 1);
 print '</td>';
 print '</tr>';
 
@@ -146,13 +116,6 @@ if ($num > 0) {
 } else {
     print '<tr><td colspan="5" class="center">'.$langs->trans("NoRecordFound").'</td></tr>';
 }
-
-// Table footer (total)
-print '<tr class="liste_total">';
-print '<td colspan="3" class="right">'.$langs->trans("Total").'</td>';
-print '<td class="right">'.price($total_ht).'</td>';
-print '<td></td>';
-print '</tr>';
 
 print '</table>';
 print '</div>';
