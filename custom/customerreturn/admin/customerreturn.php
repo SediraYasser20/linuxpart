@@ -24,10 +24,11 @@ if (!$res && file_exists(__DIR__.'/../../../main.inc.php')) $res = @include __DI
 if (!$res) die("Include of main fails");
 
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/product/class/html.formproduct.class.php';
 require_once __DIR__.'/../lib/customerreturn.lib.php';
 require_once __DIR__.'/../class/customerreturn.class.php';
 
-$langs->loadLangs(array("admin", "errors", "customerreturn@customerreturn", "other"));
+$langs->loadLangs(array("admin", "errors", "customerreturn@customerreturn", "other", "products"));
 
 $action = GETPOST('action', 'aZ09');
 $value = GETPOST('value', 'alpha');
@@ -52,6 +53,15 @@ if ($action == 'setdoc') {
     setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
 }
 
+if ($action == 'setdefaultwarehouse') {
+    $warehouse_id = GETPOST('warehouse', 'int');
+    if (dolibarr_set_const($db, "CUSTOMERRETURN_DEFAULT_WAREHOUSE", $warehouse_id, 'chaine', 0, '', $conf->entity)) {
+        setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
+    } else {
+        setEventMessages($langs->trans("Error"), null, 'errors');
+    }
+}
+
 $title = $langs->trans('CustomerReturnsSetup');
 llxHeader('', $title);
 $linkback = '<a href="'.DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1">'.$langs->trans("BackToModuleList").'</a>';
@@ -61,6 +71,7 @@ $head = customerreturnAdminPrepareHead();
 print dol_get_fiche_head($head, $tab, $title, -1, 'customerreturn@customerreturn');
 
 $form = new Form($db);
+$formproduct = new FormProduct($db);
 
 if ($tab == 'general') {
     print load_fiche_titre($langs->trans("NumberingModules"), '', '');
@@ -114,7 +125,21 @@ if ($tab == 'general') {
         }
         closedir($handle);
     }
+    print '</table><br>';
+
+    print load_fiche_titre($langs->trans("Other"), '', '');
+    print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
+    print '<input type="hidden" name="token" value="'.newToken().'">';
+    print '<input type="hidden" name="action" value="setdefaultwarehouse">';
+    print '<table class="noborder centpercent">';
+    print '<tr class="liste_titre"><td>'.$langs->trans("Parameter").'</td><td class="center" width="60">'.$langs->trans("Value").'</td></tr>';
+    print '<tr class="oddeven"><td>'.$langs->trans("DefaultWarehouseForReturns").'</td>';
+    print '<td class="center">';
+    print $formproduct->selectWarehouses(getDolGlobalString('CUSTOMERRETURN_DEFAULT_WAREHOUSE'), 'warehouse', '', 1, 0, 0, '', 0, 0, array(), 'maxwidth200');
+    print '</td></tr>';
     print '</table>';
+    print '<br><div class="center"><input type="submit" class="button" value="'.$langs->trans("Save").'"></div>';
+    print '</form>';
 }
 
 print dol_get_fiche_end();

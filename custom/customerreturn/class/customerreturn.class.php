@@ -257,6 +257,15 @@ class CustomerReturn extends CommonObject
             dol_syslog(__METHOD__." Error: ".$this->error, LOG_ERR);
             return -1;
         }
+
+        // Always use default warehouse for returns
+        $fk_entrepot = getDolGlobalInt('CUSTOMERRETURN_DEFAULT_WAREHOUSE');
+        if (empty($fk_entrepot)) {
+            $this->error = 'No default warehouse configured';
+            dol_syslog(__METHOD__." Error: ".$this->error, LOG_ERR);
+            return -1;
+        }
+
         dol_include_once('/custom/customerreturn/class/customerreturnline.class.php');
         $line = new CustomerReturnLine($this->db);
         $line->fk_customerreturn = $this->id;
@@ -340,6 +349,15 @@ class CustomerReturn extends CommonObject
             }
         }
 
+        // Check default warehouse
+        $default_warehouse = getDolGlobalInt('CUSTOMERRETURN_DEFAULT_WAREHOUSE');
+        if (empty($default_warehouse)) {
+            $this->error = 'No default warehouse configured for customer returns';
+            dol_syslog(__METHOD__." Error: ".$this->error, LOG_ERR);
+            $this->db->rollback();
+            return -1;
+        }
+
         // Load numbering module
         $numbering_module = getDolGlobalString('CUSTOMERRETURN_ADDON', 'mod_customerreturn_standard');
         dol_syslog(__METHOD__." Using numbering module: ".$numbering_module, LOG_DEBUG);
@@ -365,6 +383,16 @@ class CustomerReturn extends CommonObject
         }
 
         foreach ($this->lines as $line) {
+            // Override warehouse to default for all return lines
+            $line->fk_entrepot = $default_warehouse;
+            // Update the line in database
+            $sql = "UPDATE ".MAIN_DB_PREFIX."customerreturndet SET fk_entrepot = ".(int) $default_warehouse." WHERE rowid = ".(int) $line->id;
+            if (!$this->db->query($sql)) {
+                $this->error = $this->db->lasterror();
+                dol_syslog(__METHOD__." Error updating line warehouse: ".$this->error, LOG_ERR);
+                $this->db->rollback();
+                return -1;
+            }
             if ($line->fk_product > 0 && $line->qty > 0) {
                 if ($this->updateStock($line, $user) < 0) {
                     $this->db->rollback();

@@ -153,7 +153,7 @@ class modCustomerreturn extends DolibarrModules
             'titre' => 'NewCustomerReturn',
             'mainmenu' => 'customerreturn',
             'leftmenu' => '',
-            'url' => '/custom/customerreturn/card.php?action=create',
+            'url' => '/custom/customerreturn/create_from_shipment.php',
             'langs' => 'customerreturn@customerreturn',
             'position' => 1000 + $r,
             'enabled' => 'isModEnabled("customerreturn")',

@@ -165,3 +165,9 @@ GeneratePDF=Generate PDF
 # Watermark options
 WatermarkOnDraftCustomerReturnPDF=Watermark on draft customer return PDFs
 WatermarkOnDraftCustomerReturnPDFHelp=Text to show as watermark on PDF documents of draft customer returns
+
+
+# Warehouse
+DefaultWarehouseForCustomerReturns=Default warehouse for customer returns
+ErrorWarehouseNotSet=Default warehouse for customer returns is not set. Please configure it in the module setup.
+
