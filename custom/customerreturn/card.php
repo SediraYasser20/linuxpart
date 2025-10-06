@@ -63,6 +63,39 @@ if (empty($reshook)) {
         $action = '';
     }
 
+    // Generate document action
+    if ($action == 'builddoc' && $user->hasRight('customerreturn', 'creer')) {
+        $outputlangs = $langs;
+        $newlang = '';
+
+        if (getDolGlobalInt('MAIN_MULTILANGS') && empty($newlang) && GETPOST('lang_id', 'aZ09')) {
+            $newlang = GETPOST('lang_id', 'aZ09');
+        }
+        if (getDolGlobalInt('MAIN_MULTILANGS') && empty($newlang)) {
+            $newlang = $object->thirdparty->default_lang;
+        }
+        if (!empty($newlang)) {
+            $outputlangs = new Translate("", $conf);
+            $outputlangs->setDefaultLang($newlang);
+        }
+
+        $hidedetails = (GETPOSTINT('hidedetails') ? GETPOSTINT('hidedetails') : (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS') ? 1 : 0));
+        $hidedesc = (GETPOSTINT('hidedesc') ? GETPOSTINT('hidedesc') : (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_DESC') ? 1 : 0));
+        $hideref = (GETPOSTINT('hideref') ? GETPOSTINT('hideref') : (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_REF') ? 1 : 0));
+
+        $model = GETPOST('model', 'alpha') ? GETPOST('model', 'alpha') : $object->model_pdf;
+
+        $result = $object->generateDocument($model, $outputlangs, $hidedetails, $hidedesc, $hideref);
+        
+        if ($result <= 0) {
+            setEventMessages($object->error, $object->errors, 'errors');
+            $action = '';
+        } else {
+            setEventMessages($langs->trans("FileGenerated"), null, 'mesgs');
+            $action = '';
+        }
+    }
+
     // Validate action
     if ($action == 'confirm_validate' && $confirm == 'yes') {
         dol_syslog("card.php: Starting validation process for customer return id=".$object->id, LOG_DEBUG);
@@ -378,9 +411,67 @@ if ($object->statut == CustomerReturn::STATUS_DRAFT) {
 
 if ($object->statut == CustomerReturn::STATUS_VALIDATED) {
     if ($usercanvalidate) {
-        print '<div class="inline-block" title="'.$langs->trans('SetReturnedToSupplier').'"><a class="butAction btn-primary" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=setreturnedtosupplier&token='.newToken().'">'.$langs->trans('ReturnedToSupplier').'</a></div>';
-        print '<div class="inline-block" title="'.$langs->trans('SetChangedProductForClient').'"><a class="butAction btn-secondary" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=setchangedproductforclient&token='.newToken().'">'.$langs->trans('ChangedProductForClient').'</a></div>';
-        print '<div class="inline-block" title="'.$langs->trans('SetReimbursedMoneyToClient').'"><a class="butAction btn-success" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=setreimbursedmoneytoclient&token='.newToken().'">'.$langs->trans('ReimbursedMoneyToClient').'</a></div>';
+        print '<style>
+        .status-button-group {
+            display: inline-flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+        .status-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            background: white;
+            text-decoration: none;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+        .status-button:hover {
+            background: #f8f9fa;
+            border-color: #c0c0c0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+        .status-indicator {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-right: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .status-yellow { 
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        }
+        .status-orange { 
+            background: linear-gradient(135deg, #FF8C00 0%, #FF6347 100%);
+        }
+        .status-green { 
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+        </style>';
+        
+        print '<div class="status-button-group">';
+        print '<a class="status-button" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=setreturnedtosupplier&token='.newToken().'" title="'.$langs->trans('SetReturnedToSupplier').'">';
+        print '<span class="status-indicator status-yellow"></span>';
+        print '<span>'.$langs->trans('ReturnedToSupplier').'</span>';
+        print '</a>';
+        
+        print '<a class="status-button" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=setchangedproductforclient&token='.newToken().'" title="'.$langs->trans('SetChangedProductForClient').'">';
+        print '<span class="status-indicator status-orange"></span>';
+        print '<span>'.$langs->trans('ChangedProductForClient').'</span>';
+        print '</a>';
+        
+        print '<a class="status-button" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=setreimbursedmoneytoclient&token='.newToken().'" title="'.$langs->trans('SetReimbursedMoneyToClient').'">';
+        print '<span class="status-indicator status-green"></span>';
+        print '<span>'.$langs->trans('ReimbursedMoneyToClient').'</span>';
+        print '</a>';
+        print '</div>';
     }
 }
 
@@ -481,5 +572,6 @@ print '<div class="clearboth"></div><br>';
 // End of page
 llxFooter();
 $db->close();
+
 
 

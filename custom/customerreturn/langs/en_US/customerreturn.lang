@@ -26,6 +26,14 @@ CustomerReturnCard=Customer return card
 CreateCustomerReturn=Create customer return
 ModifyCustomerReturn=Modify customer return
 DeleteCustomerReturn=Delete customer return
+SetReturnedToSupplier=Set as Returned to Supplier
+ReturnedToSupplier=Returned to Supplier
+
+SetChangedProductForClient=Set as Changed Product for Client
+ChangedProductForClient=Changed Product for Client
+
+SetReimbursedMoneyToClient=Set as Reimbursed Money to Client
+ReimbursedMoneyToClient=Reimbursed Money to Client
 
 # Fields
 DateReturn=Return date

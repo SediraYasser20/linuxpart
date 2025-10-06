@@ -774,7 +774,112 @@ public function reverseStock($line, $user)
         }
         return $result;
     }
+/**
+ * Generate document
+ *
+ * @param  string    $modele      Model to use
+ * @param  Translate $outputlangs Language object
+ * @param  int       $hidedetails Hide details
+ * @param  int       $hidedesc    Hide description
+ * @param  int       $hideref     Hide reference
+ * @return int                    <0 if error, >0 if success
+ */
+
+/**
+ * Generate document
+ *
+ * @param  string    $modele      Model to use
+ * @param  Translate $outputlangs Language object
+ * @param  int       $hidedetails Hide details
+ * @param  int       $hidedesc    Hide description
+ * @param  int       $hideref     Hide reference
+ * @return int                    <0 if error, >0 if success
+ */
+public function generateDocument($modele, $outputlangs, $hidedetails = 0, $hidedesc = 0, $hideref = 0)
+{
+    global $conf, $langs;
+
+    $langs->load("customerreturn@customerreturn");
+
+    if (!dol_strlen($modele)) {
+        $modele = 'standard';
+        if (!empty($this->model_pdf)) {
+            $modele = $this->model_pdf;
+        } elseif (getDolGlobalString('CUSTOMERRETURN_ADDON_PDF')) {
+            $modele = getDolGlobalString('CUSTOMERRETURN_ADDON_PDF');
+        }
+    }
+
+    // Load the PDF generator class
+    $classfile = 'pdf_'.$modele.'.php';
+    $classname = 'pdf_'.$modele;
+    $filepath = DOL_DOCUMENT_ROOT.'/custom/customerreturn/core/modules/customerreturn/pdf/'.$classfile;
+
+    dol_syslog(__METHOD__." Looking for PDF class at: ".$filepath, LOG_DEBUG);
+
+    if (!file_exists($filepath)) {
+        $this->error = 'PDF generator file not found: '.$filepath;
+        dol_syslog(__METHOD__." ".$this->error, LOG_ERR);
+        return -1;
+    }
+
+    require_once $filepath;
+
+    if (!class_exists($classname)) {
+        $this->error = 'PDF generator class not found: '.$classname;
+        dol_syslog(__METHOD__." ".$this->error, LOG_ERR);
+        return -1;
+    }
+
+    $obj = new $classname($this->db);
+
+    if (!is_object($obj)) {
+        $this->error = 'Failed to instantiate PDF generator';
+        dol_syslog(__METHOD__." ".$this->error, LOG_ERR);
+        return -1;
+    }
+
+    // Set output directory
+    $objectref = dol_sanitizeFileName($this->ref);
+    if (empty($conf->customerreturn->multidir_output[$this->entity])) {
+        $conf->customerreturn->multidir_output[$this->entity] = DOL_DATA_ROOT.'/customerreturn';
+    }
+    $dir = $conf->customerreturn->multidir_output[$this->entity].'/'.$objectref;
+
+    if (!file_exists($dir)) {
+        if (dol_mkdir($dir) < 0) {
+            $this->error = $langs->trans("ErrorCanNotCreateDir", $dir);
+            dol_syslog(__METHOD__." ".$this->error, LOG_ERR);
+            return -1;
+        }
+    }
+
+    // Generate the document
+    $result = $obj->write_file($this, $outputlangs, '', $hidedetails, $hidedesc, $hideref);
+
+    if ($result > 0) {
+        // Update last_main_doc field
+        $this->last_main_doc = $objectref.'/'.$objectref.'.pdf';
+        
+        $sql = "UPDATE ".MAIN_DB_PREFIX."customerreturn";
+        $sql .= " SET last_main_doc = '".$this->db->escape($this->last_main_doc)."'";
+        $sql .= " WHERE rowid = ".(int) $this->id;
+
+        if (!$this->db->query($sql)) {
+            dol_syslog(__METHOD__." Failed to update last_main_doc", LOG_WARNING);
+        }
+
+        return 1;
+    } else {
+        $this->error = $obj->error;
+        $this->errors = $obj->errors;
+        dol_syslog(__METHOD__." Error generating PDF: ".$this->error, LOG_ERR);
+        return -1;
+    }
+}
+
  
 }
+
 
 

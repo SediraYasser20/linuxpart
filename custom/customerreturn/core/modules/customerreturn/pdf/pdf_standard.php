@@ -5,17 +5,6 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- */
-
-/**
- * \file    core/modules/customerreturn/pdf/pdf_standard.php
- * \ingroup customerreturn
- * \brief   Class to generate customer return PDF from standard template
  */
 
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
@@ -23,7 +12,6 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/pdf.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 dol_include_once('/custom/customerreturn/core/modules/customerreturn/modules_customerreturn.php');
-
 
 /**
  * Class to generate customer return PDF using standard template
@@ -56,7 +44,6 @@ class pdf_standard extends ModelePDFCustomerreturn
     {
         global $conf, $langs, $mysoc;
 
-        // Load translation files required by the page
         $langs->loadLangs(array("main", "bills", "products", "customerreturn@customerreturn"));
 
         $this->db = $db;
@@ -92,7 +79,7 @@ class pdf_standard extends ModelePDFCustomerreturn
 
     public function write_file($object, $outputlangs = null, $srctemplatepath = '', $hidedetails = 0, $hidedesc = 0, $hideref = 0)
     {
-        global $user, $langs, $conf, $hookmanager, $mysoc, $nblines;
+        global $user, $langs, $conf, $mysoc, $nblines;
 
         dol_syslog("pdf_standard::write_file", LOG_DEBUG);
 
@@ -105,18 +92,24 @@ class pdf_standard extends ModelePDFCustomerreturn
 
         $outputlangs->loadLangs(array("main", "dict", "companies", "bills", "products", "orders", "customerreturn@customerreturn"));
 
-        $nblines = count($object->lines);
-
         if (empty($conf->customerreturn)) {
             $conf->customerreturn = new stdClass();
             $conf->customerreturn->dir_output = DOL_DATA_ROOT.'/customerreturn';
         }
 
         if ($conf->customerreturn->dir_output) {
+            // Fetch object data
             $object->fetch($object->id);
-            $object->fetch_lines();
+            
+            // Load lines using getLines() method instead of deprecated fetch_lines()
+            if (empty($object->lines)) {
+                $object->lines = $object->getLines();
+            }
+            
+            $nblines = count($object->lines);
             $object->updateTotal();
 
+            // Load thirdparty
             if (empty($object->thirdparty) || !is_object($object->thirdparty)) {
                 $result = $object->fetch_thirdparty();
                 if ($result < 0) {
@@ -125,7 +118,7 @@ class pdf_standard extends ModelePDFCustomerreturn
                 }
             }
 
-            dol_syslog("pdf_standard::write_file - Fresh data loaded for object ".$object->id, LOG_DEBUG);
+            dol_syslog("pdf_standard::write_file - Data loaded for object ".$object->id, LOG_DEBUG);
 
             if ($object->specimen) {
                 $dir = $conf->customerreturn->dir_output;
@@ -206,7 +199,7 @@ class pdf_standard extends ModelePDFCustomerreturn
 
     protected function _pagehead(&$pdf, $object, $showaddress, $outputlangs)
     {
-        global $conf, $langs;
+        global $conf;
 
         $outputlangs->loadLangs(array("main", "bills", "companies", "customers", "customerreturn@customerreturn"));
 
@@ -273,26 +266,6 @@ class pdf_standard extends ModelePDFCustomerreturn
         $status_label = $object->getLibStatut(1);
         $pdf->MultiCell($w, 3, $outputlangs->transnoentities("Status")." : ".$status_label, '', 'R');
 
-        if (!empty($object->array_options)) {
-            require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
-            $extrafieldsclass = new ExtraFields($this->db);
-            $extralabels = $extrafieldsclass->fetch_name_optionals_label('customerreturn');
-
-            foreach ($object->array_options as $key => $value) {
-                if (!empty($value)) {
-                    $tmpkey = preg_replace('/options_/', '', $key);
-                    if (isset($extralabels[$tmpkey])) {
-                        $posy += 4;
-                        $pdf->SetXY($posx, $posy);
-                        $pdf->SetTextColor(0, 0, 60);
-                        $label = $outputlangs->transnoentities($extralabels[$tmpkey]);
-                        if (empty($label)) $label = $extralabels[$tmpkey];
-                        $pdf->MultiCell($w, 3, $label." : ".$outputlangs->convToOutputCharset($value), '', 'R');
-                    }
-                }
-            }
-        }
-
         if ($showaddress) {
             $carac_emetteur = pdf_build_address($outputlangs, $this->emetteur, $object->thirdparty, '', 0, 'source', $object);
 
@@ -353,11 +326,8 @@ class pdf_standard extends ModelePDFCustomerreturn
         return $posy;
     }
 
-    // _tableau and _tableau_tot contents remain identical except using customerreturn line extrafields
     protected function _tableau(&$pdf, $tab_top, $tab_height, $nexY, $outputlangs, $hidetop = 0, $hidebottom = 0, $object = null)
     {
-        global $conf;
-
         $default_font_size = pdf_getPDFFontSize($outputlangs);
 
         $this->posxdesc = $this->marge_gauche + 1;
@@ -367,7 +337,6 @@ class pdf_standard extends ModelePDFCustomerreturn
 
         $pdf->SetTextColor(0, 0, 0);
         $pdf->SetFont('', '', $default_font_size - 2);
-
         $pdf->SetDrawColor(128, 128, 128);
         $pdf->SetFont('', '', $default_font_size - 1);
 
@@ -400,18 +369,18 @@ class pdf_standard extends ModelePDFCustomerreturn
                 $pdf->SetXY($this->posxdesc, $curY);
                 $product_desc = "";
 
-                if ($line->fk_product > 0 && $line->product_ref) {
+                if ($line->fk_product > 0 && !empty($line->product_ref)) {
                     $product_desc = $line->product_ref;
-                    if ($line->product_label) {
+                    if (!empty($line->product_label)) {
                         $product_desc .= " - " . $line->product_label;
                     }
-                } elseif ($line->product_label) {
+                } elseif (!empty($line->product_label)) {
                     $product_desc = $line->product_label;
-                } elseif ($line->description) {
+                } elseif (!empty($line->description)) {
                     $product_desc = $line->description;
                 }
 
-                if ($line->description && $line->description != $line->product_label) {
+                if (!empty($line->description) && $line->description != $line->product_label) {
                     if ($product_desc) {
                         $product_desc .= "\n" . $line->description;
                     } else {
@@ -436,29 +405,6 @@ class pdf_standard extends ModelePDFCustomerreturn
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - $this->posxtotalht, 3, price($total_line, 0, $outputlangs), 0, 'R');
 
                 $nexY = max($pdf->GetY(), $nexY);
-
-                if (!empty($line->array_options)) {
-                    $tmpextrafields = new ExtraFields($this->db);
-                    $tmpextrafields->fetch_name_optionals_label('customerreturndet');
-
-                    foreach ($line->array_options as $extrafieldkey => $extrafieldvalue) {
-                        if (!empty($extrafieldvalue)) {
-                            $tmpkey = preg_replace('/options_/', '', $extrafieldkey);
-                            if (isset($tmpextrafields->attributes['customerreturndet']['label'][$tmpkey])) {
-                                $nexY += 2;
-                                $pdf->SetFont('', '', $default_font_size - 2);
-                                $pdf->SetTextColor(80, 80, 80);
-                                $pdf->SetXY($this->posxdesc, $nexY);
-                                $extralabel = $tmpextrafields->attributes['customerreturndet']['label'][$tmpkey];
-                                $pdf->MultiCell($this->posxqty - $this->posxdesc - 1, 2, $extralabel.": ".$extrafieldvalue, 0, 'L');
-                                $nexY = max($pdf->GetY(), $nexY);
-                                $pdf->SetFont('', '', $default_font_size - 1);
-                                $pdf->SetTextColor(0, 0, 0);
-                            }
-                        }
-                    }
-                }
-
                 $nexY += 4;
 
                 if ($i < (count($object->lines) - 1)) {
@@ -474,8 +420,6 @@ class pdf_standard extends ModelePDFCustomerreturn
 
     protected function _tableau_tot(&$pdf, $object, $outputlangs)
     {
-        global $conf;
-
         $default_font_size = pdf_getPDFFontSize($outputlangs);
 
         $tab2_top = $this->page_hauteur - 60;
@@ -522,7 +466,6 @@ class pdf_standard extends ModelePDFCustomerreturn
         }
         $total_ttc = $total_ht + $total_tva;
 
-        $useborder = 0;
         $index = 0;
 
         $pdf->SetFillColor(255, 255, 255);
@@ -540,12 +483,7 @@ class pdf_standard extends ModelePDFCustomerreturn
                 $this->atleastoneratenotnull++;
                 $index++;
                 $pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
-
-                if (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_WITH_PICTURE_PDF') && $this->atleastoneratenotnull == 1) {
-                    $pdf->MultiCell($col2x - $col1x, $tab2_hl, $outputlangs->transnoentities("TotalVAT"), 0, 'L', 1);
-                } else {
-                    $pdf->MultiCell($col2x - $col1x, $tab2_hl, $outputlangs->transnoentities("TotalVAT").' '.vatrate($tvakey, 1).'%', 0, 'L', 1);
-                }
+                $pdf->MultiCell($col2x - $col1x, $tab2_hl, $outputlangs->transnoentities("TotalVAT").' '.vatrate($tvakey, 1).'%', 0, 'L', 1);
 
                 $pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
                 $pdf->MultiCell($largcol2, $tab2_hl, price($tvaval, 0, $outputlangs), 0, 'R', 1);
@@ -575,11 +513,7 @@ class pdf_standard extends ModelePDFCustomerreturn
 
     protected function _pagefoot(&$pdf, $object, $outputlangs, $hidefreetext = 0)
     {
-        global $conf;
-
         $showdetails = getDolGlobalInt('MAIN_GENERATE_DOCUMENTS_SHOW_FOOT_DETAILS', 0);
-
         return pdf_pagefoot($pdf, $outputlangs, 'CUSTOMERRETURN_FREE_TEXT', $this->emetteur, $this->marge_basse, $this->marge_gauche, $this->page_hauteur, $object, $showdetails, $hidefreetext);
     }
 }
-
