@@ -1,0 +1,238 @@
+# Dolibarr language file - Source file is en_US - customerreturns
+CHARSET=UTF-8
+
+# Module
+Module104000Name=Retours Clients
+Module104000Desc=Gestion des retours de produits des clients
+Module468270Name=Retours Clients
+Module468270Desc=Gestion des retours de produits des clients
+
+# Rights
+Permission600301=Lire les retours clients
+Permission600302=Créer/modifier les retours clients
+Permission600303=Supprimer les retours clients
+Permission600304=Valider les retours clients
+Permission600305=Traiter/fermer les retours clients
+
+# Menu
+TopMenuCustomerReturns=Retours Clients
+NewCustomerReturn=Nouveau retour
+CustomerReturnsList=Liste des retours
+
+# General
+CustomerReturn=Retour client
+CustomerReturns=Retours clients
+NewCustomerReturn=Nouveau retour client
+SearchCustomerReturn=Rechercher retour client
+CustomerReturnCard=Fiche retour client
+CreateCustomerReturn=Créer retour client
+ModifyCustomerReturn=Modifier retour client
+DeleteCustomerReturn=Supprimer retour client
+
+# Fields
+DateReturn=Date de retour
+Shipment=Expédition
+OriginalShipment=Expédition d'origine
+ReturnReason=Motif du retour
+ReturnQty=Quantité retournée
+ProcessReturn=Traiter le retour
+ValidateReturn=Valider le retour
+
+# Status
+CustomerReturnStatusDraft=Brouillon
+CustomerReturnStatusValidated=Validé
+CustomerReturnStatusProcessed=Traité
+CustomerReturnStatusCanceled=Annulé
+
+# Actions/Buttons
+Process=Traiter
+ProcessCustomerReturn=Traiter le retour
+CreateCreditNote=Créer avoir
+ValidateCustomerReturn=Valider le retour
+CancelCustomerReturn=Annuler le retour
+
+# Setup / Configuration
+CustomerReturnSetup=Configuration retours clients
+Settings=Paramètres
+NumberingModule=Module de numérotation
+AutoValidateCreditNote=Validation automatique des avoirs
+DisablePDFAutoGen=Désactiver la génération PDF automatique
+BackToModuleList=Retour à la liste des modules
+
+# Administration des motifs de retour
+ReturnReasonKey=Clé du motif
+ReturnReasonLabel=Libellé du motif
+AddNewReturnReason=Ajouter un nouveau motif de retour
+DeleteReturnReason=Supprimer le motif de retour
+ConfirmDeleteReturnReason=Êtes-vous sûr de vouloir supprimer ce motif de retour ?
+ReturnReasonAdded=Motif de retour ajouté avec succès
+ReturnReasonDeleted=Motif de retour supprimé avec succès
+ReturnReasonUpdated=Motif de retour mis à jour avec succès
+ReturnReasonKeyAlreadyExists=Cette clé de motif existe déjà
+NoReturnReasonsConfigured=Aucun motif de retour configuré
+ResetToDefaultReasons=Réinitialiser aux motifs par défaut
+ConfirmResetToDefaultReasons=Êtes-vous sûr de vouloir réinitialiser aux motifs de retour par défaut ? Cela remplacera tous les motifs actuels.
+DefaultReasonsRestored=Motifs par défaut restaurés avec succès
+CustomerReturnReturnReasonsDesc=Configurez les motifs de retour disponibles pour les retours clients. Ceux-ci apparaîtront dans les listes déroulantes lors de la création de retours.
+
+# Return Reasons - Common motifs
+defective=Produit défectueux
+wrong_product=Mauvais produit expédié
+damaged=Produit endommagé
+expired=Produit périmé
+overdelivery=Sur-expédition
+quality_issue=Problème de qualité
+not_ordered=Produit non commandé
+wrong_item=Mauvais article expédié
+excess_quantity=Quantité excédentaire
+not_as_described=Non conforme à la description
+other=Autre motif
+
+DefectiveProduct=Produit défectueux
+
+# Onglets admin
+ReturnReasons=Motifs de retour
+late_delivery=Livraison tardive
+other=Autre motif
+OtherReasonDetail=Précision autre motif
+SpecifyOtherReason=Précisez le motif...
+
+# Messages admin
+NoNumberingModuleFound=Aucun module de numérotation trouvé
+NoPDFTemplateFound=Aucun modèle PDF trouvé
+ErrorFileGenerated=Erreur lors de la génération du fichier
+
+# Menu states
+CustomerReturnsDraft=Retours brouillon
+CustomerReturnsValidated=Retours validés
+CustomerReturnsProcessed=Retours traités
+CustomerReturnsCanceled=Retours annulés
+AllCustomerReturns=Tous les retours
+
+# Messages
+CustomerReturnCreditNoteCreated=Avoir créé pour le retour client %s
+CustomerReturnCreated=Retour client créé
+CustomerReturnModified=Retour client modifié
+CustomerReturnValidated=Retour client validé
+CustomerReturnProcessed=Retour client traité
+CreditNoteCreated=Facture d'avoir créée avec succès
+ConfirmValidateCustomerReturn=Êtes-vous sûr de vouloir valider ce retour client ?
+ConfirmProcessCustomerReturn=Êtes-vous sûr de vouloir traiter ce retour ? Cette action mettra à jour le stock.
+
+# Administration
+Settings=Configuration
+NumberingModule=Module de numérotation
+AutoValidateCreditNote=Valider automatiquement les avoirs
+DisablePDFAutoGen=Désactiver la génération automatique de PDF
+CustomerReturnSetup=Configuration des retours clients
+Configuration=Configuration
+
+# Shipment Status
+StatusShipmentValidated=Validée
+StatusShipmentProcessed=Traitée
+NoShipmentFound=Aucune expédition trouvée
+SelectShipment=Sélectionner une expédition
+ShipmentRef=Référence expédition
+
+# Numbering
+NumberingModuleDesc=Module de numérotation pour les références des retours clients
+SimpleNumRefModelDesc=Modèle simple avec préfixe %s
+ConfirmCreateCreditNote=Êtes-vous sûr de vouloir créer une facture d'avoir pour ce retour ? Les prix seront repris de la facture client d'origine.
+
+# From Shipment Interface
+CreateReturnFromShipment=Créer retour depuis expédition
+SelectShipment=Sélectionner une expédition
+ShipmentRef=Référence expédition
+QtyShipped=Qté expédiée
+QtyAlreadyReturned=Qté déjà retournée
+QtyAvailableForReturn=Qté disponible pour retour
+QtyToReturn=Quantité à retourner
+CreateReturn=Créer le retour
+NoShipmentFound=Aucune expédition trouvée
+NoProductInShipment=Aucun produit dans cette expédition
+StatusShipmentValidated=Validée
+ShipmentNotFound=Expédition non trouvée
+ConfirmDeleteCustomerReturn=Êtes-vous sûr de vouloir supprimer ce retour client ?
+
+# Hooks and integration
+RelatedReturns=Retours liés
+Returns=Retours
+
+# Configuration
+CustomerReturnsSetup=Configuration Retours Clients
+GeneralSettings=Paramètres généraux
+ModuleInformation=Informations du module
+CustomerReturnNumberingMask=Masque de numérotation
+CustomerReturnNumberingMaskDesc=Masque utilisé pour générer les références des retours
+AutoValidateCreditNoteDesc=Valider automatiquement les avoirs créés depuis les retours
+DisablePDFAutoGeneration=Désactiver génération PDF automatique
+DisablePDFAutoGenerationDesc=Empêche la génération automatique de PDF lors de la validation
+DataDirectory=Répertoire de données
+Modulepart=Modulepart
+DatabaseTables=Tables de base de données
+DocumentModels=Modèles de documents
+NumberingRules=Règles de numérotation
+StandardNumbering=Numérotation standard
+SetupOfNumbering=Configuration de la numérotation
+Mask=Masque
+CustomerReturnStandardPDF=Modèle standard pour retours clients
+
+# Admin interface - Numbering options
+NumberingOptions=Options de numérotation
+CustomerReturnNumberingHelp=Configuration du format de numérotation des retours clients
+AvailableVariables=Variables disponibles
+FormatOfRefNumber=Format de la référence
+NumberingMask=Masque de numérotation
+
+# Admin interface - Document templates
+CustomerReturnsDocumentModels=Modèles de documents pour retours clients
+
+# Legacy configuration keys (to be removed)
+CUSTOMERRETURN_AUTO_VALIDATE_CREDITNOTE=Validation automatique des avoirs créés
+CUSTOMERRETURN_AUTO_VALIDATE_CREDITNOTE_HELP=Si activé, les factures d'avoir créées depuis les retours seront automatiquement validées
+ExtraFields=Champs supplémentaires
+Lines=Lignes
+
+# Admin
+Setup=Configuration
+Options=Options
+
+# Triggers/Events
+CustomerReturnCreated=Retour client %s créé
+CustomerReturnValidated=Retour client %s validé
+CustomerReturnClosed=Retour client %s fermé
+
+# Error messages
+ErrorCustomerReturnNotFound=Retour client non trouvé
+ErrorCannotDeleteValidatedReturn=Impossible de supprimer un retour validé
+ErrorNoLinesInReturn=Aucune ligne dans ce retour
+
+# Additional fields
+CustomerRef=Référence client
+InternalRef=Référence interne
+AutoGenerateRef=Générer automatiquement la référence
+ToBeGenerated=À générer automatiquement
+
+# PDF Generation
+CustomerReturnStandardPDF=Modèle standard pour retours clients
+PDFCustomerReturnTitle=Retour Client
+GeneratePDF=Générer PDF
+
+# Watermark options
+WatermarkOnDraftCustomerReturnPDF=Filigrane sur les PDF de retours brouillon
+WatermarkOnDraftCustomerReturnPDFHelp=Texte à afficher en filigrane sur les documents PDF des retours en statut brouillon
+
+# Admin page - new native style
+CustomerReturnsNumberingModules=Modules de numérotation des retours clients
+CustomerReturnsDocumentModels=Modèles de documents pour retours clients
+OtherOptions=Autres options
+FreeLegalTextOnCustomerReturns=Texte libre sur les retours clients
+FreeLegalTextOnCustomerReturnsHelp=Texte libre à insérer sur chaque document de retour
+ConfigureExtraFields=Configurer les champs additionnels
+ConfigureExtraFieldsLines=Configurer les champs additionnels des lignes
+ExtraFieldsLines=Champs additionnels (lignes)
+Activated=Activé
+Disabled=Désactivé
+NextValue=Prochaine valeur
+Version=Version
+SetupSaved=Configuration sauvegardée

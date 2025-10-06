@@ -1,0 +1,173 @@
+# Dolibarr language file - en_US - customerreturns
+CHARSET=UTF-8
+
+# Module
+Module468270Name=Customer Returns
+Module468270Desc=Management of product returns from customers
+
+# Rights
+Permission468271=Read customer returns
+Permission468272=Create/modify customer returns
+Permission600303=Delete customer returns
+Permission600304=Validate customer returns
+Permission600305=Process/close customer returns
+
+# Menu
+TopMenuCustomerReturns=Customer Returns
+NewCustomerReturn=New return
+CustomerReturnsList=Returns list
+
+# General
+CustomerReturn=Customer return
+CustomerReturns=Customer returns
+NewCustomerReturn=New customer return
+SearchCustomerReturn=Search customer return
+CustomerReturnCard=Customer return card
+CreateCustomerReturn=Create customer return
+ModifyCustomerReturn=Modify customer return
+DeleteCustomerReturn=Delete customer return
+
+# Fields
+DateReturn=Return date
+Shipment=Shipment
+OriginalShipment=Original shipment
+ReturnReason=Return reason
+ReturnQty=Returned quantity
+ProcessReturn=Process return
+ValidateReturn=Validate return
+
+# Status
+CustomerReturnStatusDraft=Draft
+
+# Return Reasons Administration
+ReturnReasonKey=Reason key
+ReturnReasonLabel=Reason label
+AddNewReturnReason=Add new return reason
+DeleteReturnReason=Delete return reason
+ConfirmDeleteReturnReason=Are you sure you want to delete this return reason?
+ReturnReasonAdded=Return reason added successfully
+ReturnReasonDeleted=Return reason deleted successfully
+ReturnReasonUpdated=Return reason updated successfully
+ReturnReasonKeyAlreadyExists=This reason key already exists
+NoReturnReasonsConfigured=No return reasons configured
+ResetToDefaultReasons=Reset to default reasons
+ConfirmResetToDefaultReasons=Are you sure you want to reset to default return reasons? This will replace all current reasons.
+DefaultReasonsRestored=Default reasons restored successfully
+CustomerReturnReturnReasonsDesc=Configure the available return reasons for customer returns. These will appear in dropdown lists when creating returns.
+
+# Default return reasons
+defective=Defective product
+damaged=Damaged during transport
+wrong_item=Wrong item shipped
+excess_quantity=Excess quantity
+quality_issue=Quality issue
+not_as_described=Not as described
+other=Other reason
+
+DefectiveProduct=Defective product
+
+# Admin tabs
+ReturnReasons=Return Reasons
+CustomerReturnStatusValidated=Validated
+CustomerReturnStatusProcessed=Processed
+CustomerReturnStatusCanceled=Canceled
+
+# Actions/Buttons
+Process=Process
+ProcessCustomerReturn=Process return
+CreateCreditNote=Create credit note
+ValidateCustomerReturn=Validate return
+CancelCustomerReturn=Cancel return
+
+# Return Reasons - Common motifs
+wrong_product=Wrong product shipped
+expired=Expired product
+overdelivery=Over delivery
+not_ordered=Product not ordered
+late_delivery=Late delivery
+OtherReasonDetail=Other reason detail
+SpecifyOtherReason=Please specify the reason...
+
+# Admin messages
+NoNumberingModuleFound=No numbering module found
+NoPDFTemplateFound=No PDF template found
+ErrorFileGenerated=Error generating file
+
+# Menu states
+CustomerReturnsDraft=Draft returns
+CustomerReturnsValidated=Validated returns
+CustomerReturnsProcessed=Processed returns
+CustomerReturnsCanceled=Canceled returns
+AllCustomerReturns=All returns
+
+# Messages
+CustomerReturnCreated=Customer return created
+CustomerReturnModified=Customer return modified
+CustomerReturnValidated=Customer return validated
+CustomerReturnProcessed=Customer return processed
+CreditNoteCreated=Credit note created successfully
+CustomerReturnCreditNoteCreated=Credit note created for customer return %s
+ConfirmValidateCustomerReturn=Are you sure you want to validate this customer return?
+ConfirmProcessCustomerReturn=Are you sure you want to process this return? This action will update stock.
+
+# From Shipment Interface
+CreateReturnFromShipment=Create return from shipment
+SelectShipment=Select a shipment
+ShipmentRef=Shipment reference
+QtyShipped=Qty shipped
+QtyAlreadyReturned=Qty already returned
+QtyAvailableForReturn=Qty available for return
+QtyToReturn=Qty to return
+CreateReturn=Create return
+NoShipmentFound=No shipment found
+NoProductInShipment=No product in this shipment
+StatusShipmentValidated=Validated
+ShipmentNotFound=Shipment not found
+ConfirmDeleteCustomerReturn=Are you sure you want to delete this customer return?
+
+# Additional fields
+CustomerRef=Customer reference
+InternalRef=Internal reference
+AutoGenerateRef=Auto generate reference
+ToBeGenerated=To be generated automatically
+
+# Configuration
+CustomerReturnsSetup=Customer Returns Setup
+GeneralSettings=General settings
+ModuleInformation=Module information
+CustomerReturnNumberingMask=Numbering mask
+CustomerReturnNumberingMaskDesc=Mask used to generate return references
+AutoValidateCreditNoteDesc=Automatically validate credit notes created from returns
+DisablePDFAutoGeneration=Disable PDF auto-generation
+DisablePDFAutoGenerationDesc=Prevent automatic PDF generation during validation
+DataDirectory=Data directory
+Modulepart=Modulepart
+DatabaseTables=Database tables
+DocumentModels=Document templates
+NumberingRules=Numbering rules
+StandardNumbering=Standard numbering
+SetupOfNumbering=Numbering setup
+Mask=Mask
+CustomerReturnStandardPDF=Standard model for customer returns
+Settings=Settings
+NumberingModule=Numbering module
+ExtraFields=Extra fields
+
+# Error messages
+ErrorCustomerReturnNotFound=Customer return not found
+ErrorCannotDeleteValidatedReturn=Cannot delete validated return
+ErrorNoLinesInReturn=No lines in this return
+
+# PDF Generation
+PDFCustomerReturnTitle=Customer Return
+GeneratePDF=Generate PDF
+
+# Watermark options
+WatermarkOnDraftCustomerReturnPDF=Watermark on draft customer return PDFs
+WatermarkOnDraftCustomerReturnPDFHelp=Text to show as watermark on PDF documents of draft customer returns
+
+
+# Warehouse
+DefaultWarehouseForCustomerReturns=Default warehouse for customer returns
+ErrorWarehouseNotSet=Default warehouse for customer returns is not set. Please configure it in the module setup.
+
