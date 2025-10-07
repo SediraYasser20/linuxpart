@@ -67,6 +67,7 @@ require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.class.php';
 require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.product.class.php';
 
 require_once './class/supplierreturn.class.php';
+dol_include_once('/custom/supplierreturn/class/supplierreturnline.class.php');
 dol_include_once('/custom/supplierreturn/lib/supplierreturn.lib.php');
 require_once './core/modules/supplierreturn/modules_supplierreturn.php';
 
@@ -282,6 +283,36 @@ if (empty($reshook)) {
         $fk_entrepot = GETPOSTINT('entrepot_id');
         $batch = GETPOST('batch', 'alpha');
 
+        // Enforce default warehouse if set
+        $default_warehouse_id = getDolGlobalString('SUPPLIERRETURN_DEFAULT_WAREHOUSE_ID');
+        if ($default_warehouse_id > 0) {
+            $fk_entrepot = $default_warehouse_id;
+        }
+
+        // Validate batch/serial number
+        if (!empty($batch)) {
+            // Get product ID from the line being updated
+            $line_to_update = new SupplierReturnLine($db);
+            $line_to_update->fetch($lineid);
+            $fk_product_for_validation = $line_to_update->fk_product;
+
+            if (!empty($fk_product_for_validation) && !empty($fk_entrepot)) {
+                $sql_tmp = "SELECT pb.rowid FROM ".MAIN_DB_PREFIX."product_batch as pb";
+                $sql_tmp .= " INNER JOIN ".MAIN_DB_PREFIX."product_stock as ps ON ps.rowid = pb.fk_product_stock";
+                $sql_tmp .= " WHERE ps.fk_product = " . (int) $fk_product_for_validation;
+                $sql_tmp .= " AND ps.fk_entrepot = " . (int) $fk_entrepot;
+                $sql_tmp .= " AND pb.batch = '" . $db->escape($batch) . "' LIMIT 1";
+                $resql_tmp = $db->query($sql_tmp);
+                if ($resql_tmp && $db->num_rows($resql_tmp) == 0) {
+                    $error++;
+                    setEventMessages($langs->trans("ErrorBatchOrSerialNotFoundForProductInWarehouse"), null, 'errors');
+                }
+            } else if (empty($fk_entrepot)) {
+                 $error++;
+                 setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Warehouse")), null, 'errors');
+            }
+        }
+
         $qty = price2num($qty);
         $subprice = price2num($subprice);
 
@@ -307,6 +338,35 @@ if (empty($reshook)) {
             } else {
                 setEventMessages('Vous devez sélectionner un produit ou saisir une description', null, 'errors');
                 $error++;
+            }
+        }
+
+        // Validate batch/serial number
+        if (!$error && !empty($batch)) {
+            $fk_product_for_validation = GETPOSTINT('productid');
+            if (empty($fk_product_for_validation) && $idprodfournprice > 0) {
+                 $sql_tmp = "SELECT pfp.fk_product FROM ".MAIN_DB_PREFIX."product_fournisseur_price pfp WHERE pfp.rowid = ".(int)$idprodfournprice;
+                 $resql_tmp = $db->query($sql_tmp);
+                 if ($resql_tmp && $db->num_rows($resql_tmp) > 0) {
+                     $obj_tmp = $db->fetch_object($resql_tmp);
+                     $fk_product_for_validation = $obj_tmp->fk_product;
+                 }
+            }
+
+            if (!empty($fk_product_for_validation) && !empty($fk_entrepot)) {
+                $sql_tmp = "SELECT pb.rowid FROM ".MAIN_DB_PREFIX."product_batch as pb";
+                $sql_tmp .= " INNER JOIN ".MAIN_DB_PREFIX."product_stock as ps ON ps.rowid = pb.fk_product_stock";
+                $sql_tmp .= " WHERE ps.fk_product = " . (int) $fk_product_for_validation;
+                $sql_tmp .= " AND ps.fk_entrepot = " . (int) $fk_entrepot;
+                $sql_tmp .= " AND pb.batch = '" . $db->escape($batch) . "' LIMIT 1";
+                $resql_tmp = $db->query($sql_tmp);
+                if ($resql_tmp && $db->num_rows($resql_tmp) == 0) {
+                    $error++;
+                    setEventMessages($langs->trans("ErrorBatchOrSerialNotFoundForProductInWarehouse"), null, 'errors');
+                }
+            } else if (empty($fk_entrepot)) {
+                 $error++;
+                 setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Warehouse")), null, 'errors');
             }
         }
 
@@ -392,6 +452,12 @@ if (empty($reshook)) {
         $description = GETPOST('product_desc', 'restricthtml');
         $fk_entrepot = GETPOSTINT('entrepot_id');
         $batch = GETPOST('batch', 'alpha');
+
+        // Enforce default warehouse if set
+        $default_warehouse_id = getDolGlobalString('SUPPLIERRETURN_DEFAULT_WAREHOUSE_ID');
+        if ($default_warehouse_id > 0) {
+            $fk_entrepot = $default_warehouse_id;
+        }
 
         $qty = price2num($qty);
         $subprice = price2num($subprice);
@@ -489,6 +555,30 @@ if (empty($reshook)) {
             } else {
                 setEventMessages($object->error, $object->errors, 'errors');
             }
+        }
+    }
+
+    // Action to set status to "Returned to Vendor"
+    if ($action == 'confirm_returned_to_vendor' && $confirm == 'yes' && $permissiontoadd) {
+        $result = $object->setReturnedToVendor($user);
+        if ($result < 0) {
+            setEventMessages($object->error, $object->errors, 'errors');
+        }
+    }
+
+    // Action to set status to "Reimbursed from Vendor"
+    if ($action == 'confirm_reimbursed_from_vendor' && $confirm == 'yes' && $permissiontoadd) {
+        $result = $object->setReimbursedFromVendor($user);
+        if ($result < 0) {
+            setEventMessages($object->error, $object->errors, 'errors');
+        }
+    }
+
+    // Action to set status to "Product Changed from Vendor"
+    if ($action == 'confirm_product_changed_from_vendor' && $confirm == 'yes' && $permissiontoadd) {
+        $result = $object->setProductChangedFromVendor($user);
+        if ($result < 0) {
+            setEventMessages($object->error, $object->errors, 'errors');
         }
     }
 }
@@ -688,6 +778,19 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
         $formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('CreateCreditNote'), $langs->trans('ConfirmCreateCreditNote'), 'confirm_createcreditnote', $formquestion, 0, 1, 220);
     }
 
+    if ($action == 'returned_to_vendor') {
+        $formquestion = array();
+        $formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('ReturnedToVendor'), $langs->trans('ConfirmReturnedToVendor'), 'confirm_returned_to_vendor', $formquestion, 0, 1, 220);
+    }
+    if ($action == 'reimbursed_from_vendor') {
+        $formquestion = array();
+        $formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('ReimbursedFromVendor'), $langs->trans('ConfirmReimbursedFromVendor'), 'confirm_reimbursed_from_vendor', $formquestion, 0, 1, 220);
+    }
+    if ($action == 'product_changed_from_vendor') {
+        $formquestion = array();
+        $formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('ProductChangedFromVendor'), $langs->trans('ConfirmProductChangedFromVendor'), 'confirm_product_changed_from_vendor', $formquestion, 0, 1, 220);
+    }
+
     // Print form confirm
     print $formconfirm;
 
@@ -851,9 +954,11 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
                 }
             }
 
-            // Process
+            // New status buttons
             if ($object->statut == SupplierReturn::STATUS_VALIDATED) {
-                print dolGetButtonAction('', $langs->trans('Process'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=confirm_process&confirm=yes&token='.newToken(), '', $permissiontoadd);
+                print dolGetButtonAction('', $langs->trans('ReturnedToVendor'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=returned_to_vendor&token='.newToken(), '', $permissiontoadd);
+                print dolGetButtonAction('', $langs->trans('ReimbursedFromVendor'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=reimbursed_from_vendor&token='.newToken(), '', $permissiontoadd);
+                print dolGetButtonAction('', $langs->trans('ProductChangedFromVendor'), 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=product_changed_from_vendor&token='.newToken(), '', $permissiontoadd);
             }
 
             // Create credit note

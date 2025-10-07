@@ -57,12 +57,15 @@ class SupplierReturn extends CommonObject
         'note_public' => array('type' => 'html', 'label' => 'NotePublic', 'enabled' => '1', 'position' => 61, 'notnull' => 0, 'visible' => 0),
         'note_private' => array('type' => 'html', 'label' => 'NotePrivate', 'enabled' => '1', 'position' => 62, 'notnull' => 0, 'visible' => 0),
         'last_main_doc' => array('type' => 'varchar(255)', 'label' => 'LastMainDoc', 'enabled' => '1', 'position' => 63, 'notnull' => 0, 'visible' => 0),
-        'statut' => array('type' => 'smallint', 'label' => 'Status', 'enabled' => '1', 'position' => 1000, 'notnull' => 1, 'visible' => 5, 'default' => '0', 'index' => 1, 'arrayofkeyval' => array('0' => 'Draft', '1' => 'Validated', '2' => 'Closed')),
+        'statut' => array('type' => 'smallint', 'label' => 'Status', 'enabled' => '1', 'position' => 1000, 'notnull' => 1, 'visible' => 5, 'default' => '0', 'index' => 1, 'arrayofkeyval' => array('0' => 'Draft', '1' => 'Validated', '2' => 'Closed', '3' => 'ReturnedToVendor', '4' => 'ReimbursedFromVendor', '5' => 'ProductChangedFromVendor')),
     );
 
     const STATUS_DRAFT = 0;
     const STATUS_VALIDATED = 1;
-    const STATUS_CLOSED = 2;
+    const STATUS_CLOSED = 2; // Kept for compatibility, but the new flow will use the statuses below
+    const STATUS_RETURNED_TO_VENDOR = 3;
+    const STATUS_REIMBURSED_FROM_VENDOR = 4;
+    const STATUS_PRODUCT_CHANGED_FROM_VENDOR = 5;
 
     /**
      * Check if extended columns exist in the table
@@ -528,8 +531,10 @@ class SupplierReturn extends CommonObject
             $statusType = 'status0';  // Gray for draft
         } elseif ($status == self::STATUS_VALIDATED) {
             $statusType = 'status4';  // Green for validated/approved
+        } elseif ($status == self::STATUS_RETURNED_TO_VENDOR || $status == self::STATUS_REIMBURSED_FROM_VENDOR || $status == self::STATUS_PRODUCT_CHANGED_FROM_VENDOR) {
+            $statusType = 'status5'; // Orange/Yellow for processed
         } elseif ($status == self::STATUS_CLOSED) {
-            $statusType = 'status6';  // Red for closed
+            $statusType = 'status6';  // Red for closed/cancelled
         } else {
             $statusType = 'status0';  // Default to gray
         }
@@ -537,7 +542,10 @@ class SupplierReturn extends CommonObject
         $statusLabels = array(
             self::STATUS_DRAFT => $langs->trans('Draft'),
             self::STATUS_VALIDATED => $langs->trans('Validated'),
-            self::STATUS_CLOSED => $langs->trans('Closed')
+            self::STATUS_CLOSED => $langs->trans('Closed'),
+            self::STATUS_RETURNED_TO_VENDOR => $langs->trans('ReturnedToVendor'),
+            self::STATUS_REIMBURSED_FROM_VENDOR => $langs->trans('ReimbursedFromVendor'),
+            self::STATUS_PRODUCT_CHANGED_FROM_VENDOR => $langs->trans('ProductChangedFromVendor')
         );
 
         $statusLabel = isset($statusLabels[$status]) ? $statusLabels[$status] : 'Unknown';
@@ -919,6 +927,22 @@ class SupplierReturn extends CommonObject
         }
 
         dol_syslog("SupplierReturn::validate() - Preparing update query", LOG_INFO);
+        // Process each line (update stock)
+        foreach ($lines as $line) {
+            if ($line->fk_product > 0 && $line->qty > 0) {
+                $result = $this->updateStock($line, $user);
+                if ($result < 0) {
+                    $error++;
+                    break;
+                }
+            }
+        }
+
+        if ($error) {
+            $this->db->rollback();
+            return -1;
+        }
+
         // Update status and reference
         $sql = "UPDATE ".MAIN_DB_PREFIX."supplierreturn SET";
         $sql .= " statut = ".self::STATUS_VALIDATED;
@@ -1017,18 +1041,6 @@ class SupplierReturn extends CommonObject
         }
 
         $this->db->begin();
-
-        // Process each line (update stock)
-        $lines = $this->getLines();
-        foreach ($lines as $line) {
-            if ($line->fk_product > 0 && $line->qty > 0) {
-                $result = $this->updateStock($line, $user);
-                if ($result < 0) {
-                    $error++;
-                    break;
-                }
-            }
-        }
 
         if (!$error) {
             // Update status
@@ -1217,7 +1229,7 @@ class SupplierReturn extends CommonObject
             $line->fk_product,
             $line->fk_entrepot,
             $line->qty,
-            0, // price
+            $line->subprice,
             $label,
             '', // datem
             $eatby_date,
@@ -1308,7 +1320,7 @@ class SupplierReturn extends CommonObject
             $line->fk_product,
             $line->fk_entrepot,
             $line->qty,
-            0, // price
+            $line->subprice,
             $label,
             $eatby_date,
             $sellby_date,
@@ -2112,7 +2124,20 @@ class SupplierReturn extends CommonObject
                     print '<td class="center">';
                     require_once DOL_DOCUMENT_ROOT.'/product/class/html.formproduct.class.php';
                     $formproduct = new FormProduct($this->db);
-                    print $formproduct->selectWarehouses($line->fk_entrepot, 'entrepot_id', '', 1, 0, 0, '', 0, 0, array(), 'minwidth100');
+
+                    $default_warehouse_id = getDolGlobalString('SUPPLIERRETURN_DEFAULT_WAREHOUSE_ID');
+
+                    if ($default_warehouse_id > 0) {
+                        // If a default warehouse is set, show it as plain text
+                        require_once DOL_DOCUMENT_ROOT.'/product/stock/class/entrepot.class.php';
+                        $warehouse = new Entrepot($this->db);
+                        $warehouse->fetch($default_warehouse_id);
+                        print $warehouse->getNomUrl(1);
+                        print '<input type="hidden" name="entrepot_id" value="'.$default_warehouse_id.'">';
+                    } else {
+                        // Otherwise, show the standard warehouse selector
+                        print $formproduct->selectWarehouses($line->fk_entrepot, 'entrepot_id', '', 1, 0, 0, '', 0, 0, array(), 'minwidth100');
+                    }
                     print '</td>';
                 }
                 print '<td class="right">';
@@ -2137,6 +2162,9 @@ class SupplierReturn extends CommonObject
                 }
                 if ($line->description) {
                     print '<br>'.dol_nl2br($line->description);
+                }
+                if (!empty($line->batch)) {
+                    print '<br>'.$langs->trans('Batch').'/'.$langs->trans('SerialNumber').': '.dol_escape_htmltag($line->batch);
                 }
                 print '</td>';
                 print '<td class="center">'.$line->qty.'</td>';
@@ -2221,7 +2249,12 @@ class SupplierReturn extends CommonObject
         }
         
         // Use the standard product/service selector
-        print $form->select_produits('', 'productid', $filtertype, 0, 0, 1, 2, '', 1, array(), 0, '1', 0, 'minwidth300 maxwidth500');
+        $options = array();
+        $default_warehouse_id = getDolGlobalString('SUPPLIERRETURN_DEFAULT_WAREHOUSE_ID');
+        if ($default_warehouse_id > 0) {
+            $options['warehouse_id'] = $default_warehouse_id;
+        }
+        print $form->select_produits('', 'productid', $filtertype, 0, 0, 1, 2, '', 1, $options, 0, '1', 0, 'minwidth300 maxwidth500');
 
         print '<br><textarea id="product_desc" name="product_desc" rows="2" style="width:100%" placeholder="'.$langs->trans('Description').'"></textarea>';
         print '</td>';
@@ -2239,13 +2272,26 @@ class SupplierReturn extends CommonObject
         // Warehouse
         if (isModEnabled('stock')) {
             print '<td class="center">';
-            if (isModEnabled('stock')) {
-                require_once DOL_DOCUMENT_ROOT.'/product/class/html.formproduct.class.php';
-                if (!is_object($formproduct)) {
-                    $formproduct = new FormProduct($this->db);
-                }
+
+            require_once DOL_DOCUMENT_ROOT.'/product/class/html.formproduct.class.php';
+            if (!is_object($formproduct)) {
+                $formproduct = new FormProduct($this->db);
+            }
+
+            $default_warehouse_id = getDolGlobalString('SUPPLIERRETURN_DEFAULT_WAREHOUSE_ID');
+
+            if ($default_warehouse_id > 0) {
+                // If a default warehouse is set, show it as plain text
+                require_once DOL_DOCUMENT_ROOT.'/product/stock/class/entrepot.class.php';
+                $warehouse = new Entrepot($this->db);
+                $warehouse->fetch($default_warehouse_id);
+                print $warehouse->getNomUrl(1);
+                print '<input type="hidden" name="entrepot_id" value="'.$default_warehouse_id.'">';
+            } else {
+                // Otherwise, show the standard warehouse selector
                 print $formproduct->selectWarehouses('', 'entrepot_id', '', 1, 0, 0, '', 0, 0, array(), 'minwidth100');
             }
+
             print '</td>';
         }
 
@@ -2885,6 +2931,44 @@ class SupplierReturn extends CommonObject
         $this->lines[] = $line2;
         
         return 1;
+    }
+
+    public function setReturnedToVendor($user)
+    {
+        return $this->setFinalStatus(self::STATUS_RETURNED_TO_VENDOR, $user);
+    }
+
+    public function setReimbursedFromVendor($user)
+    {
+        return $this->setFinalStatus(self::STATUS_REIMBURSED_FROM_VENDOR, $user);
+    }
+
+    public function setProductChangedFromVendor($user)
+    {
+        return $this->setFinalStatus(self::STATUS_PRODUCT_CHANGED_FROM_VENDOR, $user);
+    }
+
+    private function setFinalStatus($status, $user)
+    {
+        if ($this->statut != self::STATUS_VALIDATED) {
+            $this->error = 'Supplier return must be in validated status to be processed.';
+            return -1;
+        }
+
+        $this->db->begin();
+
+        $sql = "UPDATE ".MAIN_DB_PREFIX."supplierreturn SET statut = ".(int)$status." WHERE rowid = ".(int)$this->id;
+        $resql = $this->db->query($sql);
+
+        if ($resql) {
+            $this->statut = $status;
+            $this->db->commit();
+            return 1;
+        } else {
+            $this->error = $this->db->lasterror();
+            $this->db->rollback();
+            return -1;
+        }
     }
 
     // Properties for compatibility

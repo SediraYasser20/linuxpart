@@ -92,6 +92,19 @@ if (empty($conf->supplierreturns)) {
 // Standard module options processing
 include DOL_DOCUMENT_ROOT.'/core/actions_setmoduleoptions.inc.php';
 
+// Set default warehouse
+if ($action == 'set_default_warehouse') {
+    $default_warehouse_id = GETPOSTINT('default_warehouse_id');
+
+    $res = dolibarr_set_const($db, 'SUPPLIERRETURN_DEFAULT_WAREHOUSE_ID', $default_warehouse_id, 'chaine', 0, '', $conf->entity);
+
+    if ($res > 0) {
+        setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
+    } else {
+        setEventMessages($langs->trans("Error"), null, 'errors');
+    }
+}
+
 // Update numbering mask
 if ($action == 'updateMask') {
     $maskconstorder = GETPOST('maskconstorder', 'aZ09');
@@ -534,6 +547,44 @@ if ($tab == 'general') {
 
     print '</table>';
     print '</div>';
+    print '<br>';
+
+
+    /*
+     * Warehouse settings
+     */
+    print load_fiche_titre($langs->trans("WarehouseSettings"), '', '');
+
+    print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
+    print '<input type="hidden" name="token" value="'.newToken().'">';
+    print '<input type="hidden" name="action" value="set_default_warehouse">';
+    print '<input type="hidden" name="tab" value="'.$tab.'">';
+
+    print '<table class="noborder centpercent">';
+    print '<tr class="liste_titre">';
+    print '<td>'.$langs->trans("Parameter").'</td>';
+    print '<td>'.$langs->trans("Value").'</td>';
+    print '<td class="center">'.$langs->trans("Action").'</td>';
+    print '</tr>';
+
+    print '<tr class="oddeven">';
+    print '<td>'.$langs->trans("DefaultWarehouse").'</td>';
+    print '<td>';
+
+    require_once DOL_DOCUMENT_ROOT . '/product/class/html.formproduct.class.php';
+    $formproduct = new FormProduct($db);
+    $selected_warehouse = getDolGlobalString('SUPPLIERRETURN_DEFAULT_WAREHOUSE_ID');
+
+    print $formproduct->selectWarehouses($selected_warehouse, 'default_warehouse_id', '', 1, 0, 0, null, 0, 0, null, 'minwidth200');
+
+    print '</td>';
+    print '<td class="center">';
+    print '<input type="submit" class="button button-edit small" value="'.$langs->trans("Modify").'">';
+    print '</td>';
+    print '</tr>';
+
+    print '</table>';
+    print '</form>';
     print '<br>';
 
 
